@@ -145,8 +145,8 @@
     <string name="exclude_from_total">Jangan hitung di total</string>
     <string name="exclude_from_total_hint">mis. tabungan yang nggak mau ikut total harian</string>
     <string name="capture_source">Sumber pencatatan otomatis</string>
-    <string name="capture_source_none">Tidak ada (manual saja)</string>
-    <string name="capture_source_hint">Notifikasi dari aplikasi ini dicatat ke dompet ini.</string>
+    <string name="wallet_capture_from">Dicatat dari %1$s</string>
+    <string name="wallet_capture_none">Belum ada aplikasi yang dicatat ke dompet ini.</string>
     <string name="archive_wallet">Arsipkan</string>
     <string name="archive_wallet_hint">Sembunyikan dari pilihan &amp; total, riwayat tetap ada</string>
     <string name="delete_wallet_q">Hapus dompet ini?</string>
@@ -322,7 +322,7 @@
     <string name="capture_apps_title">Aplikasi yang dicatat</string>
     <string name="capture_apps_choose">Pilih aplikasi</string>
     <string name="capture_apps_n">Aplikasi yang dicatat (%1$d)</string>
-    <string name="capture_apps_default_hint">Memakai daftar bank dan dompet digital bawaan sampai kamu memilih aplikasi.</string>
+    <string name="capture_apps_none_hint">Belum ada yang dicatat sampai kamu memilih aplikasi.</string>
     <string name="capture_apps_intro">Centang aplikasi bank dan dompet digitalmu. Hanya notifikasinya yang dibaca, dan masing-masing masuk ke dompet yang kamu pilih.</string>
     <string name="capture_apps_search">Cari aplikasi</string>
     <string name="capture_apps_suggested">Langsung didukung</string>

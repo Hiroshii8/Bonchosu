@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,7 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.hiroshi.moneyapp.AppContainer
 import com.hiroshi.moneyapp.R
-import com.hiroshi.moneyapp.capture.ParserRegistry
+import com.hiroshi.moneyapp.capture.recordingInto
 import com.hiroshi.moneyapp.core.Money
 import com.hiroshi.moneyapp.data.db.WalletEntity
 import com.hiroshi.moneyapp.data.db.WalletType
@@ -115,7 +116,8 @@ fun WalletsScreen(nav: NavController) {
                 SectionCard(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)) {
                     active.forEachIndexed { i, w ->
                         if (i > 0) HorizontalDivider(color = Brand.Line)
-                        WalletRow(w, settings.autoCaptureEnabled) { nav.navigate(Routes.wallet(w.wallet.id)) }
+                        val captured = settings.autoCaptureEnabled && settings.captureApps.orEmpty().recordingInto(w.wallet).isNotEmpty()
+                        WalletRow(w, captured) { nav.navigate(Routes.wallet(w.wallet.id)) }
                     }
                 }
             }
@@ -142,7 +144,7 @@ private fun WalletRow(w: WalletWithBalance, showCapture: Boolean, onClick: () ->
         Column(Modifier.weight(1f)) {
             Text(w.wallet.name, fontWeight = FontWeight.Bold, fontSize = 14.sp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (showCapture && w.wallet.captureSource != null) Icon(Icons.Default.Bolt, null, tint = Brand.Green, modifier = Modifier.height(13.dp))
+                if (showCapture) Icon(Icons.Default.Bolt, null, tint = Brand.Green, modifier = Modifier.height(13.dp))
                 Text(
                     walletTypeLabel(w.wallet.type) + if (w.wallet.excludeFromTotal) " · " + stringResource(R.string.excluded) else "",
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -170,7 +172,6 @@ data class WalletForm(
     val type: WalletType = WalletType.BANK,
     val digits: String = "",
     val negative: Boolean = false,
-    val captureSource: String? = null,
     val excludeFromTotal: Boolean = false,
     val archived: Boolean = false,
     val error: Int? = null,
@@ -188,7 +189,7 @@ class WalletEditViewModel(private val c: AppContainer) : ViewModel() {
             _form.value = if (w == null) WalletForm(loaded = true) else WalletForm(
                 loaded = true, original = w, name = w.name, type = w.type,
                 digits = if (w.initialBalance == 0L) "" else kotlin.math.abs(w.initialBalance).toString(),
-                negative = w.initialBalance < 0, captureSource = w.captureSource,
+                negative = w.initialBalance < 0,
                 excludeFromTotal = w.excludeFromTotal, archived = w.archived,
             )
         }
@@ -204,7 +205,8 @@ class WalletEditViewModel(private val c: AppContainer) : ViewModel() {
             val base = f.original ?: WalletEntity(name = f.name.trim(), type = f.type)
             c.wallets.save(
                 base.copy(
-                    name = f.name.trim(), type = f.type, initialBalance = balance, captureSource = f.captureSource,
+                    // captureSource is left as it was: it only marks a wallet that capture created for an app.
+                    name = f.name.trim(), type = f.type, initialBalance = balance,
                     excludeFromTotal = f.excludeFromTotal, archived = f.archived,
                 )
             )
@@ -249,17 +251,21 @@ fun WalletEditScreen(nav: NavController, id: Long) {
             SwitchRow(stringResource(R.string.negative_balance), stringResource(R.string.negative_balance_hint), f.negative) { v -> vm.edit { it.copy(negative = v) } }
             SwitchRow(stringResource(R.string.exclude_from_total), stringResource(R.string.exclude_from_total_hint), f.excludeFromTotal) { v -> vm.edit { it.copy(excludeFromTotal = v) } }
 
-            // Feature-flagged: linking a wallet to a capture source only makes sense with auto-capture on.
-            if (settings.autoCaptureEnabled) {
-                DropdownField<String?>(
-                    label = stringResource(R.string.capture_source),
-                    options = listOf(null) + ParserRegistry.sources,
-                    selected = f.captureSource,
-                    optionLabel = { it ?: stringResource(R.string.capture_source_none) },
-                    onSelect = { s -> vm.edit { it.copy(captureSource = s) } },
-                    placeholder = stringResource(R.string.capture_source_none),
-                )
-                Text(stringResource(R.string.capture_source_hint), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Which apps record here is set in one place, the app picker; this only shows it.
+            val original = f.original
+            if (settings.autoCaptureEnabled && original != null) {
+                val apps = settings.captureApps.orEmpty().recordingInto(original)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.capture_source), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(
+                            if (apps.isEmpty()) stringResource(R.string.wallet_capture_none)
+                            else stringResource(R.string.wallet_capture_from, apps.joinToString(", ") { it.label }),
+                            fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    TextButton(onClick = { nav.navigate(Routes.CAPTURE_APPS) }) { Text(stringResource(R.string.capture_apps_choose)) }
+                }
             }
 
             if (id > 0) {

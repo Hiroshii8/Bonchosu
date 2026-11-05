@@ -1,6 +1,7 @@
 package com.hiroshi.moneyapp.capture
 
 import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletEntity
 import com.hiroshi.moneyapp.data.db.WalletType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -116,12 +117,14 @@ class NotificationParserTest {
 
     @Test
     fun `superbank package uses the superbank parser`() {
-        assertTrue(ParserRegistry.forPackage("id.co.bankfama.android") is SuperbankParser)
+        val chosen = listOf(CaptureApp("id.co.bankfama.android", "Superbank", null))
+        assertTrue(ParserRegistry.resolve("id.co.bankfama.android", chosen, null) is SuperbankParser)
     }
 
     @Test
     fun `seabank real time transfer is an expense`() {
-        val seabank = ParserRegistry.forPackage("id.co.bankbkemobile.digitalbank")!!
+        val chosen = listOf(CaptureApp("id.co.bankbkemobile.digitalbank", "SeaBank", null))
+        val seabank = ParserRegistry.resolve("id.co.bankbkemobile.digitalbank", chosen, null)!!
         val p = seabank.parse("SeaBank", "Kamu baru melakukan transfer real-time senilai Rp35.000 pada 05 NOV 2026", 1L)
         assertEquals(TxType.EXPENSE, p!!.type)
         assertEquals(35_000L, p.amount)
@@ -135,9 +138,30 @@ class NotificationParserTest {
     }
 
     @Test
-    fun `before picking apps the built in list applies`() {
-        assertEquals("BCA", ParserRegistry.resolve("com.bca", null, null)?.source)
-        assertNull(ParserRegistry.resolve("com.unknown.bank", null, null))
+    fun `with no apps picked nothing is read`() {
+        assertNull(ParserRegistry.resolve("com.bca", emptyList(), null))
+        assertNull(ParserRegistry.resolve("id.co.bankfama.android", emptyList(), null))
+    }
+
+    @Test
+    fun `a known e-wallet keeps its type when not linked to a wallet`() {
+        val chosen = listOf(CaptureApp("ovo.id", "OVO", null))
+        assertEquals(WalletType.EWALLET, ParserRegistry.resolve("ovo.id", chosen, null)!!.walletType)
+    }
+
+    @Test
+    fun `apps recording into a wallet`() {
+        val bca = WalletEntity(id = 1, name = "BCA", type = WalletType.BANK, captureSource = "BCA")
+        val cash = WalletEntity(id = 2, name = "Cash", type = WalletType.CASH)
+        val superbank = WalletEntity(id = 3, name = "Superbank", type = WalletType.BANK, captureSource = "Superbank")
+        val chosen = listOf(
+            CaptureApp("com.bca", "BCA", null),                 // records into the wallet created for it
+            CaptureApp("id.dana", "DANA", 2),                    // linked directly
+            CaptureApp("id.co.bankfama.android", "Super", null), // its own parser names the wallet "Superbank"
+        )
+        assertEquals(listOf("BCA"), chosen.recordingInto(bca).map { it.label })
+        assertEquals(listOf("DANA"), chosen.recordingInto(cash).map { it.label })
+        assertEquals(listOf("Super"), chosen.recordingInto(superbank).map { it.label })
     }
 
     @Test
