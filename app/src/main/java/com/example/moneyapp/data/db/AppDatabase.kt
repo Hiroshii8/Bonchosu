@@ -1,4 +1,4 @@
-package com.example.moneyapp.data.db
+package com.hiroshi.moneyapp.data.db
 
 import android.content.ContentValues
 import android.content.Context
@@ -8,7 +8,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.moneyapp.R
+import com.hiroshi.moneyapp.R
 
 @Database(
     entities = [
@@ -24,9 +24,9 @@ import com.example.moneyapp.R
         BillItemShareEntity::class,
         BillChargeEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun walletDao(): WalletDao

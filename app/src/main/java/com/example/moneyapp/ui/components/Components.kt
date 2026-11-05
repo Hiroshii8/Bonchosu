@@ -1,7 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.moneyapp.ui.components
+package com.hiroshi.moneyapp.ui.components
 
+import android.app.TimePickerDialog
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,18 +71,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.MoneyApplication
-import com.example.moneyapp.R
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.data.db.TransactionRow
-import com.example.moneyapp.data.db.TxSource
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.theme.CategoryPalette
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.MoneyApplication
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.data.db.TransactionRow
+import com.hiroshi.moneyapp.data.db.TxSource
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.theme.CategoryPalette
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -141,7 +144,7 @@ fun ScreenScaffold(
 @Composable
 fun SectionCard(
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
+    color: Color = Brand.Card,
     contentPadding: PaddingValues = PaddingValues(16.dp),
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -183,6 +186,7 @@ fun CategoryBadge(label: String, colorIndex: Int?, size: Dp = 40.dp) {
     }
 }
 
+@Composable
 fun amountColor(type: TxType): Color = when (type) {
     TxType.INCOME -> Brand.IncomeText
     TxType.EXPENSE -> Brand.Ink
@@ -350,6 +354,28 @@ fun DateField(label: String, date: LocalDate, onChange: (LocalDate) -> Unit, mod
             },
             dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         ) { DatePicker(state = state) }
+    }
+}
+
+/** Time input that opens the system time picker (12 or 24 hour, following the phone's setting). */
+@Composable
+fun TimeField(label: String, time: LocalTime, onChange: (LocalTime) -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    Box(modifier) {
+        OutlinedTextField(
+            value = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(currentLocale()).format(time),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Box(Modifier.matchParentSize().clickable {
+            TimePickerDialog(
+                context,
+                { _, hour, minute -> onChange(LocalTime.of(hour, minute)) },
+                time.hour, time.minute, DateFormat.is24HourFormat(context),
+            ).show()
+        })
     }
 }
 

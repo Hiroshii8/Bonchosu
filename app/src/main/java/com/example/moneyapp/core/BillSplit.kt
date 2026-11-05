@@ -1,4 +1,4 @@
-package com.example.moneyapp.core
+package com.hiroshi.moneyapp.core
 
 /**
  * Splits a bill in whole rupiah. Every amount is shared by "largest remainder",

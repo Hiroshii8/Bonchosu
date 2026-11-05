@@ -1,11 +1,11 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
 import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.example.moneyapp.BuildConfig
-import com.example.moneyapp.MoneyApplication
+import com.hiroshi.moneyapp.BuildConfig
+import com.hiroshi.moneyapp.MoneyApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,8 +34,7 @@ class TransactionListenerService : NotificationListenerService() {
         if (BuildConfig.DEBUG && DEBUG_CAPTURE) {
             Log.d(TAG, "pkg=${sbn.packageName} | title=$title | text=$text")
         }
-        if (ParserRegistry.forPackage(sbn.packageName) == null) return
-
+        // Which apps count (your picks, or the built-in list) is decided in the processor.
         val processor = (application as MoneyApplication).container.captureProcessor
         scope.launch {
             runCatching { processor.handle(sbn.packageName, title, text, sbn.postTime) }

@@ -2,6 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Budget alerts. Asked for only when you turn alerts on in Settings. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      Lets the auto-capture app picker list apps that have a home-screen icon (bank and e-wallet apps all do),
+      without QUERY_ALL_PACKAGES, which Google Play restricts.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MoneyApplication"
         android:allowBackup="false"

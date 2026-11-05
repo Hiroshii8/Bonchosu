@@ -1,6 +1,6 @@
-package com.example.moneyapp.bill
+package com.hiroshi.moneyapp.bill
 
-import com.example.moneyapp.core.Money
+import com.hiroshi.moneyapp.core.Money
 import java.time.LocalDate
 
 // Pure Kotlin, no Android imports: unit-test it on the JVM with real receipt samples.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- AppCompat parent is needed for the in-app language switch. Compose draws everything else. -->
-    <style name="Theme.MoneyApp" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- AppCompat parent is needed for the in-app language switch; DayNight for the Theme setting. Compose draws everything else. -->
+    <style name="Theme.MoneyApp" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/ground</item>
     </style>
 </resources>

@@ -1,6 +1,6 @@
-package com.example.moneyapp.core
+package com.hiroshi.moneyapp.core
 
-import com.example.moneyapp.data.db.BudgetPeriod
+import com.hiroshi.moneyapp.data.db.BudgetPeriod
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId

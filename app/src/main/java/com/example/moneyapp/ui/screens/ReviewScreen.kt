@@ -1,5 +1,6 @@
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,22 +43,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.CategoryType
-import com.example.moneyapp.data.db.TransactionRow
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.EmptyState
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.amountColor
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.components.formatDate
-import com.example.moneyapp.ui.components.signedAmount
-import com.example.moneyapp.core.Periods
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.CategoryType
+import com.hiroshi.moneyapp.data.db.TransactionRow
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.EmptyState
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.amountColor
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.components.formatDate
+import com.hiroshi.moneyapp.ui.components.signedAmount
+import com.hiroshi.moneyapp.core.Periods
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -136,7 +137,7 @@ private fun ReviewCard(
     onIgnore: () -> Unit,
     onEdit: () -> Unit,
 ) {
-    SectionCard {
+    SectionCard(modifier = Modifier.clickable(onClick = onEdit)) {
         Row {
             Text(row.walletName, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
             Text(formatDate(Periods.toDate(row.occurredAt)), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)

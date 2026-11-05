@@ -1,16 +1,16 @@
-package com.example.moneyapp.data
+package com.hiroshi.moneyapp.data
 
 import androidx.room.withTransaction
-import com.example.moneyapp.core.BillSplit
-import com.example.moneyapp.core.Periods
-import com.example.moneyapp.data.db.AppDatabase
-import com.example.moneyapp.data.db.BillChargeEntity
-import com.example.moneyapp.data.db.BillEntity
-import com.example.moneyapp.data.db.BillItemEntity
-import com.example.moneyapp.data.db.BillItemShareEntity
-import com.example.moneyapp.data.db.BillPersonEntity
-import com.example.moneyapp.data.db.TransactionEntity
-import com.example.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.core.BillSplit
+import com.hiroshi.moneyapp.core.Periods
+import com.hiroshi.moneyapp.data.db.AppDatabase
+import com.hiroshi.moneyapp.data.db.BillChargeEntity
+import com.hiroshi.moneyapp.data.db.BillEntity
+import com.hiroshi.moneyapp.data.db.BillItemEntity
+import com.hiroshi.moneyapp.data.db.BillItemShareEntity
+import com.hiroshi.moneyapp.data.db.BillPersonEntity
+import com.hiroshi.moneyapp.data.db.TransactionEntity
+import com.hiroshi.moneyapp.data.db.TxType
 import java.time.LocalDate
 
 /** A finished draft. People are referred to by [NewPerson.key] until they have database ids. */

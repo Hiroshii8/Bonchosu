@@ -1,4 +1,4 @@
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,25 +45,25 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.capture.ParserRegistry
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.data.db.WalletEntity
-import com.example.moneyapp.data.db.WalletType
-import com.example.moneyapp.data.db.WalletWithBalance
-import com.example.moneyapp.data.settings.AppSettings
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.components.AmountField
-import com.example.moneyapp.ui.components.CategoryBadge
-import com.example.moneyapp.ui.components.ConfirmDialog
-import com.example.moneyapp.ui.components.DropdownField
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.theme.AmountStyle
-import com.example.moneyapp.ui.walletTypeLabel
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.capture.ParserRegistry
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.data.db.WalletEntity
+import com.hiroshi.moneyapp.data.db.WalletType
+import com.hiroshi.moneyapp.data.db.WalletWithBalance
+import com.hiroshi.moneyapp.data.settings.AppSettings
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.components.AmountField
+import com.hiroshi.moneyapp.ui.components.CategoryBadge
+import com.hiroshi.moneyapp.ui.components.ConfirmDialog
+import com.hiroshi.moneyapp.ui.components.DropdownField
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.theme.AmountStyle
+import com.hiroshi.moneyapp.ui.walletTypeLabel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,7 +96,7 @@ fun WalletsScreen(nav: NavController) {
                 onClick = { nav.navigate(Routes.wallet()) },
                 icon = { Icon(Icons.Default.Add, null) },
                 text = { Text(stringResource(R.string.add_wallet)) },
-                containerColor = Brand.Green, contentColor = Color.White,
+                containerColor = Brand.Hero, contentColor = Color.White,
             )
         },
     ) { padding ->

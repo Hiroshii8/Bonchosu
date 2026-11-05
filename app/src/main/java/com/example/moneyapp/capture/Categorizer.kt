@@ -1,6 +1,6 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
-import com.example.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.TxType
 
 // Pure Kotlin: guesses a category for a captured transaction.
 

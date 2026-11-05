@@ -1,4 +1,4 @@
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -6,12 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.WalletEntity
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.WalletEntity
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.appContainer
 
 /** All categories (archived included, for names); filter `!archived` for pickers. */
 @Composable

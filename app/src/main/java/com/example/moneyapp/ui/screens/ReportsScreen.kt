@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -39,28 +39,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.core.PeriodKind
-import com.example.moneyapp.core.Periods
-import com.example.moneyapp.data.db.CategoryTotal
-import com.example.moneyapp.data.db.MonthTotal
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.EmptyState
-import com.example.moneyapp.ui.components.PeriodSwitcher
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.SectionTitle
-import com.example.moneyapp.ui.components.SegmentedChoice
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.components.currentLocale
-import com.example.moneyapp.ui.components.formatDate
-import com.example.moneyapp.ui.components.formatMonth
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.theme.CategoryPalette
-import com.example.moneyapp.ui.txTypeLabel
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.core.PeriodKind
+import com.hiroshi.moneyapp.core.Periods
+import com.hiroshi.moneyapp.data.db.CategoryTotal
+import com.hiroshi.moneyapp.data.db.MonthTotal
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.EmptyState
+import com.hiroshi.moneyapp.ui.components.PeriodSwitcher
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.SectionTitle
+import com.hiroshi.moneyapp.ui.components.SegmentedChoice
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.components.currentLocale
+import com.hiroshi.moneyapp.ui.components.formatDate
+import com.hiroshi.moneyapp.ui.components.formatMonth
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.theme.CategoryPalette
+import com.hiroshi.moneyapp.ui.txTypeLabel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -87,7 +87,7 @@ class ReportsViewModel(c: AppContainer) : ViewModel() {
 
     // Last 6 months for the trend chart (independent of the selected period).
     private val sixMonths = Periods.month(YearMonth.now().minusMonths(5)).let { first ->
-        com.example.moneyapp.core.DateRange(first.startMs, Periods.month(YearMonth.now()).endMs)
+        com.hiroshi.moneyapp.core.DateRange(first.startMs, Periods.month(YearMonth.now()).endMs)
     }
 
     val state = query.flatMapLatest { q ->
@@ -240,13 +240,15 @@ private fun MonthBars(months: List<MonthTotal>) {
         Triple(ym.month.getDisplayName(TextStyle.SHORT, locale), m?.income ?: 0L, m?.expense ?: 0L)
     }
     val max = data.maxOf { maxOf(it.second, it.third) }.coerceAtLeast(1)
+    // Paler than the expense bar in light mode, darker in dark mode, so the pair stays easy to tell apart.
+    val incomeBar = if (Brand.isDark) Color(0xFF3B6A5B) else Color(0xFF9CC7B6)
 
     Row(Modifier.fillMaxWidth().height(150.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
         data.forEach { (label, inc, exp) ->
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Bottom) {
                 Text(Money.formatShort(exp), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.height(100.dp)) {
-                    Bar(inc.toFloat() / max, Color(0xFF9CC7B6))
+                    Bar(inc.toFloat() / max, incomeBar)
                     Bar(exp.toFloat() / max, Brand.Green)
                 }
                 Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
@@ -254,7 +256,7 @@ private fun MonthBars(months: List<MonthTotal>) {
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        LegendDot(Color(0xFF9CC7B6), stringResource(R.string.income))
+        LegendDot(incomeBar, stringResource(R.string.income))
         LegendDot(Brand.Green, stringResource(R.string.expense))
     }
 }

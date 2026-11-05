@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class)
 
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -45,31 +45,32 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.core.Periods
-import com.example.moneyapp.core.Recurrence
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.CategoryType
-import com.example.moneyapp.data.db.Frequency
-import com.example.moneyapp.data.db.RecurringEntity
-import com.example.moneyapp.data.db.TransactionEntity
-import com.example.moneyapp.data.db.TxSource
-import com.example.moneyapp.data.db.TxStatus
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.AmountField
-import com.example.moneyapp.ui.components.CategoryBadge
-import com.example.moneyapp.ui.components.ConfirmDialog
-import com.example.moneyapp.ui.components.DateField
-import com.example.moneyapp.ui.components.DropdownField
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SegmentedChoice
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.frequencyLabel
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.txTypeLabel
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.core.Periods
+import com.hiroshi.moneyapp.core.Recurrence
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.CategoryType
+import com.hiroshi.moneyapp.data.db.Frequency
+import com.hiroshi.moneyapp.data.db.RecurringEntity
+import com.hiroshi.moneyapp.data.db.TransactionEntity
+import com.hiroshi.moneyapp.data.db.TxSource
+import com.hiroshi.moneyapp.data.db.TxStatus
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.AmountField
+import com.hiroshi.moneyapp.ui.components.CategoryBadge
+import com.hiroshi.moneyapp.ui.components.ConfirmDialog
+import com.hiroshi.moneyapp.ui.components.DateField
+import com.hiroshi.moneyapp.ui.components.DropdownField
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SegmentedChoice
+import com.hiroshi.moneyapp.ui.components.TimeField
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.frequencyLabel
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.txTypeLabel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -89,7 +90,7 @@ data class TxForm(
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
     val note: String = "",
-    val merchant: String? = null,
+    val merchant: String = "",
     val excludeFromReport: Boolean = false,
     /** Only for new transactions: also create a recurring rule. */
     val repeat: Frequency? = null,
@@ -112,7 +113,7 @@ class TransactionEditViewModel(private val c: AppContainer) : ViewModel() {
                 TxForm(
                     loaded = true, id = tx.id, type = tx.type, digits = tx.amount.toString(),
                     walletId = tx.walletId, toWalletId = tx.toWalletId, categoryId = tx.categoryId,
-                    date = at.toLocalDate(), time = at.toLocalTime(), note = tx.note, merchant = tx.merchant,
+                    date = at.toLocalDate(), time = at.toLocalTime(), note = tx.note, merchant = tx.merchant.orEmpty(),
                     excludeFromReport = tx.excludeFromReport, pending = tx.status == TxStatus.PENDING_REVIEW,
                     rawText = tx.rawText, original = tx,
                 )
@@ -154,6 +155,7 @@ class TransactionEditViewModel(private val c: AppContainer) : ViewModel() {
                 categoryId = if (f.type == TxType.TRANSFER) null else f.categoryId,
                 occurredAt = occurredAt,
                 note = f.note.trim(),
+                merchant = if (f.type == TxType.TRANSFER) null else f.merchant.trim().ifEmpty { null },
                 excludeFromReport = f.type != TxType.TRANSFER && f.excludeFromReport,
                 status = TxStatus.CONFIRMED, // saving a reviewed capture confirms it
             )
@@ -246,13 +248,28 @@ fun TransactionEditScreen(nav: NavController, id: Long, initialType: String) {
                 )
             }
 
-            DateField(stringResource(R.string.date), f.date, { d -> vm.edit { it.copy(date = d) } })
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                DateField(stringResource(R.string.date), f.date, { d -> vm.edit { it.copy(date = d) } }, Modifier.weight(1f))
+                TimeField(stringResource(R.string.time), f.time, { t -> vm.edit { it.copy(time = t) } }, Modifier.weight(0.6f))
+            }
+
+            if (f.type != TxType.TRANSFER) {
+                // Captures fill this in from the notification or statement; fixing it here also teaches the category.
+                OutlinedTextField(
+                    value = f.merchant,
+                    onValueChange = { m -> vm.edit { it.copy(merchant = m) } },
+                    label = { Text(stringResource(R.string.merchant)) },
+                    placeholder = { Text(stringResource(R.string.merchant_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
             OutlinedTextField(
                 value = f.note,
                 onValueChange = { n -> vm.edit { it.copy(note = n) } },
                 label = { Text(stringResource(R.string.note)) },
-                placeholder = { Text(f.merchant ?: stringResource(R.string.note_hint)) },
+                placeholder = { Text(stringResource(R.string.note_hint)) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -308,7 +325,7 @@ fun CategoryGrid(categories: List<CategoryEntity>, selectedId: Long?, onPick: (C
             Surface(
                 onClick = { onPick(cat) },
                 shape = RoundedCornerShape(14.dp),
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Brand.Card,
                 border = BorderStroke(2.dp, if (selected) Brand.Green else androidx.compose.ui.graphics.Color.Transparent),
                 modifier = Modifier.width(84.dp),
             ) {

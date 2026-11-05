@@ -1,4 +1,4 @@
-package com.example.moneyapp.data.db
+package com.hiroshi.moneyapp.data.db
 
 // Room stores enums as their name (TEXT), so the SQL in Daos.kt compares against 'EXPENSE' etc.
 

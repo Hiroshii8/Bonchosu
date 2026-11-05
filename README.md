@@ -14,8 +14,8 @@ Kotlin · Jetpack Compose · Room · DataStore · WorkManager · min SDK 26 · E
 3. Press ▶ with your phone connected.
 4. Unit tests: right-click `app/src/test` → **Run tests** (no phone needed).
 
-The package is `com.example.moneyapp`. To rename: change `namespace`/`applicationId` in `app/build.gradle.kts`,
-then right-click the `com.example.moneyapp` package → **Refactor → Rename**.
+The package is `com.hiroshi.moneyapp`. To rename: change `namespace`/`applicationId` in `app/build.gradle.kts`,
+then right-click the `com.hiroshi.moneyapp` package → **Refactor → Rename**.
 
 ## What's in v1
 
@@ -62,7 +62,11 @@ AppContainer        manual dependency injection (one place that wires everything
 
 ## Before you rely on auto-capture
 
-The parser wording and the bank **package names are best guesses** (`capture/NotificationParser.kt`):
+Which apps are read: Settings → Auto-capture → **Apps to capture from**. You tick installed apps (listed through a
+launcher-intent `<queries>`, not `QUERY_ALL_PACKAGES`) and link each to a wallet. Until you pick any, the built-in
+`ParserRegistry` list applies. Picked apps use the keyword rules unless they have a dedicated parser (e.g. Superbank).
+
+The parser wording and the built-in **package names are best guesses** (`capture/NotificationParser.kt`):
 
 1. Set `DEBUG_CAPTURE = true` in `TransactionListenerService`, run a debug build, make a few real payments.
 2. In Logcat filter `NotifCapture` and copy the real notification texts and package names.
@@ -101,7 +105,7 @@ which uninstalls the app and wipes its data afterwards:
 
 ```
 gradlew :app:installDebug :app:installDebugAndroidTest
-adb shell am instrument -w com.example.moneyapp.test/androidx.test.runner.AndroidJUnitRunner
+adb shell am instrument -w com.hiroshi.moneyapp.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 ## Next (v2 ideas)

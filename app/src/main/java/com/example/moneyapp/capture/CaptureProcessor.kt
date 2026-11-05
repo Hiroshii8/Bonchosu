@@ -1,12 +1,12 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
-import com.example.moneyapp.data.TransactionRepository
-import com.example.moneyapp.data.db.AppDatabase
-import com.example.moneyapp.data.db.TransactionEntity
-import com.example.moneyapp.data.db.TxSource
-import com.example.moneyapp.data.db.TxStatus
-import com.example.moneyapp.data.db.WalletEntity
-import com.example.moneyapp.data.settings.SettingsRepository
+import com.hiroshi.moneyapp.data.TransactionRepository
+import com.hiroshi.moneyapp.data.db.AppDatabase
+import com.hiroshi.moneyapp.data.db.TransactionEntity
+import com.hiroshi.moneyapp.data.db.TxSource
+import com.hiroshi.moneyapp.data.db.TxStatus
+import com.hiroshi.moneyapp.data.db.WalletEntity
+import com.hiroshi.moneyapp.data.settings.SettingsRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -27,13 +27,14 @@ class CaptureProcessor(
         val s = settings.current()
         if (!s.autoCaptureEnabled) return null // feature flag: off means we never touch notifications
 
-        val parser = ParserRegistry.forPackage(packageName) ?: return null
+        val linked = s.captureApps?.firstOrNull { it.packageName == packageName }?.walletId?.let { db.walletDao().get(it) }
+        val parser = ParserRegistry.resolve(packageName, s.captureApps, linked?.type) ?: return null
         val parsed = parser.parse(title, text, postTime) ?: return null
-        return mutex.withLock { save(parsed, s.autoSaveConfident) }
+        return mutex.withLock { save(parsed, s.autoSaveConfident, linked) }
     }
 
-    private suspend fun save(p: ParsedCapture, autoSave: Boolean): Long? {
-        val wallet = walletFor(p)
+    private suspend fun save(p: ParsedCapture, autoSave: Boolean, linked: WalletEntity?): Long? {
+        val wallet = linked ?: walletFor(p)
 
         // Same wallet, type and amount within ±3 minutes = the same transaction
         // (a repeated notification, or something you already typed in by hand).

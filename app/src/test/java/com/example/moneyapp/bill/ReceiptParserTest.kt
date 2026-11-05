@@ -1,4 +1,4 @@
-package com.example.moneyapp.bill
+package com.hiroshi.moneyapp.bill
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -1,10 +1,12 @@
 @file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 
-package com.example.moneyapp.ui
+package com.hiroshi.moneyapp.ui
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,27 +54,30 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.moneyapp.R
-import com.example.moneyapp.ui.screens.ActivityScreen
-import com.example.moneyapp.ui.screens.BillDetailScreen
-import com.example.moneyapp.ui.screens.BillEditScreen
-import com.example.moneyapp.ui.screens.BillsScreen
-import com.example.moneyapp.ui.screens.BudgetEditScreen
-import com.example.moneyapp.ui.screens.BudgetsScreen
-import com.example.moneyapp.ui.screens.CaptureSetupScreen
-import com.example.moneyapp.ui.screens.CategoriesScreen
-import com.example.moneyapp.ui.screens.CategoryEditScreen
-import com.example.moneyapp.ui.screens.HomeScreen
-import com.example.moneyapp.ui.screens.RecurringEditScreen
-import com.example.moneyapp.ui.screens.RecurringScreen
-import com.example.moneyapp.ui.screens.ReportsScreen
-import com.example.moneyapp.ui.screens.ReviewScreen
-import com.example.moneyapp.ui.screens.SettingsScreen
-import com.example.moneyapp.ui.screens.StatementImportScreen
-import com.example.moneyapp.ui.screens.TransactionEditScreen
-import com.example.moneyapp.ui.screens.WalletEditScreen
-import com.example.moneyapp.ui.screens.WalletsScreen
-import com.example.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.ui.screens.ActivityScreen
+import com.hiroshi.moneyapp.ui.screens.BackupScreen
+import com.hiroshi.moneyapp.ui.screens.BillDetailScreen
+import com.hiroshi.moneyapp.ui.screens.BillEditScreen
+import com.hiroshi.moneyapp.ui.screens.BillsScreen
+import com.hiroshi.moneyapp.ui.screens.BudgetEditScreen
+import com.hiroshi.moneyapp.ui.screens.BudgetsScreen
+import com.hiroshi.moneyapp.ui.screens.CaptureAppsScreen
+import com.hiroshi.moneyapp.ui.screens.CaptureSetupScreen
+import com.hiroshi.moneyapp.ui.screens.CategoriesScreen
+import com.hiroshi.moneyapp.ui.screens.CategoryEditScreen
+import com.hiroshi.moneyapp.ui.screens.HomeCustomizeScreen
+import com.hiroshi.moneyapp.ui.screens.HomeScreen
+import com.hiroshi.moneyapp.ui.screens.RecurringEditScreen
+import com.hiroshi.moneyapp.ui.screens.RecurringScreen
+import com.hiroshi.moneyapp.ui.screens.ReportsScreen
+import com.hiroshi.moneyapp.ui.screens.ReviewScreen
+import com.hiroshi.moneyapp.ui.screens.SettingsScreen
+import com.hiroshi.moneyapp.ui.screens.StatementImportScreen
+import com.hiroshi.moneyapp.ui.screens.TransactionEditScreen
+import com.hiroshi.moneyapp.ui.screens.WalletEditScreen
+import com.hiroshi.moneyapp.ui.screens.WalletsScreen
+import com.hiroshi.moneyapp.ui.theme.Brand
 
 /** Route strings and builders, in one place. */
 object Routes {
@@ -87,6 +92,9 @@ object Routes {
     const val RECURRING = "recurring"
     const val CAPTURE_SETUP = "capture-setup"
     const val STATEMENT_IMPORT = "statement-import"
+    const val HOME_CUSTOMIZE = "home-customize"
+    const val CAPTURE_APPS = "capture-apps"
+    const val BACKUP = "backup"
     const val BILLS = "bills"
     const val BILL_NEW = "bill-new"
     const val BILL_DETAIL = "bill?id={id}"
@@ -108,7 +116,7 @@ object Routes {
     val tabs = setOf(HOME, ACTIVITY, BUDGETS, REPORTS)
 }
 
-private const val SCREEN_FADE_MS = 200
+private const val SCREEN_FADE_MS = 350
 
 private val idArg = navArgument("id") { type = NavType.LongType; defaultValue = 0L }
 private val typeArg = navArgument("type") { type = NavType.StringType; defaultValue = "" }
@@ -128,9 +136,8 @@ fun AppRoot() {
             navController = nav,
             startDestination = Routes.HOME,
             modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding),
-            // The library default is a 700 ms fade, which feels sluggish. 0 here means no animation.
-            enterTransition = { fadeIn(tween(SCREEN_FADE_MS)) },
-            exitTransition = { fadeOut(tween(SCREEN_FADE_MS)) },
+            enterTransition = { slideInHorizontally(tween(SCREEN_FADE_MS)) },
+            exitTransition = { slideOutHorizontally(tween(SCREEN_FADE_MS)) },
         ) {
             composable(Routes.HOME) { HomeScreen(nav) }
             composable(Routes.ACTIVITY) { ActivityScreen(nav) }
@@ -143,6 +150,9 @@ fun AppRoot() {
             composable(Routes.RECURRING) { RecurringScreen(nav) }
             composable(Routes.CAPTURE_SETUP) { CaptureSetupScreen(nav) }
             composable(Routes.STATEMENT_IMPORT) { StatementImportScreen(nav) }
+            composable(Routes.HOME_CUSTOMIZE) { HomeCustomizeScreen(nav) }
+            composable(Routes.CAPTURE_APPS) { CaptureAppsScreen(nav) }
+            composable(Routes.BACKUP) { BackupScreen(nav) }
             composable(Routes.BILLS) { BillsScreen(nav) }
             composable(Routes.BILL_NEW) { BillEditScreen(nav) }
             composable(Routes.BILL_DETAIL, listOf(idArg)) { BillDetailScreen(nav, it.arguments?.getLong("id") ?: 0L) }
@@ -150,7 +160,9 @@ fun AppRoot() {
             composable(Routes.TX_EDIT, listOf(idArg, typeArg)) {
                 TransactionEditScreen(nav, it.arguments?.getLong("id") ?: 0L, it.arguments?.getString("type").orEmpty())
             }
-            composable(Routes.WALLET_EDIT, listOf(idArg)) { WalletEditScreen(nav, it.arguments?.getLong("id") ?: 0L) }
+            composable(Routes.WALLET_EDIT, listOf(idArg)) {
+                WalletEditScreen(nav, it.arguments?.getLong("id") ?: 0L)
+            }
             composable(Routes.CATEGORY_EDIT, listOf(idArg, typeArg)) {
                 CategoryEditScreen(nav, it.arguments?.getLong("id") ?: 0L, it.arguments?.getString("type").orEmpty())
             }
@@ -171,13 +183,13 @@ private val tabs = listOf(
 
 @Composable
 private fun BottomBar(current: String?, nav: NavHostController) {
+    // Always land on the tab's main page: no saving or restoring whatever was open inside it.
     fun go(route: String) = nav.navigate(route) {
-        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+        popUpTo(nav.graph.findStartDestination().id)
         launchSingleTop = true
-        restoreState = true
     }
 
-    Surface(color = Color.White) {
+    Surface(color = Brand.Card) {
         Column(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) {
             HorizontalDivider(color = Brand.Line)
             Row(
@@ -213,7 +225,7 @@ private fun AddButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = Brand.Green,
+        color = Brand.Hero,
         shadowElevation = 6.dp,
         modifier = Modifier.size(56.dp),
     ) {

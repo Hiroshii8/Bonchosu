@@ -1,8 +1,14 @@
-package com.example.moneyapp.ui.screens
+@file:OptIn(ExperimentalLayoutApi::class)
+
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.FilterChip
+import com.hiroshi.moneyapp.core.BudgetAlerts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,30 +47,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.core.BudgetProgress
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.data.db.BudgetEntity
-import com.example.moneyapp.data.db.BudgetPeriod
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.CategoryType
-import com.example.moneyapp.data.db.WalletEntity
-import com.example.moneyapp.data.db.WalletType
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.budgetPeriodLabel
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.AmountField
-import com.example.moneyapp.ui.components.BudgetBar
-import com.example.moneyapp.ui.components.CategoryBadge
-import com.example.moneyapp.ui.components.ConfirmDialog
-import com.example.moneyapp.ui.components.DropdownField
-import com.example.moneyapp.ui.components.EmptyState
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.SegmentedChoice
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.core.BudgetProgress
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.data.db.BudgetEntity
+import com.hiroshi.moneyapp.data.db.BudgetPeriod
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.CategoryType
+import com.hiroshi.moneyapp.data.db.WalletEntity
+import com.hiroshi.moneyapp.data.db.WalletType
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.budgetPeriodLabel
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.AmountField
+import com.hiroshi.moneyapp.ui.components.BudgetBar
+import com.hiroshi.moneyapp.ui.components.CategoryBadge
+import com.hiroshi.moneyapp.ui.components.ConfirmDialog
+import com.hiroshi.moneyapp.ui.components.DropdownField
+import com.hiroshi.moneyapp.ui.components.EmptyState
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.SegmentedChoice
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.theme.Brand
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,7 +100,7 @@ fun BudgetsScreen(nav: NavController) {
                 onClick = { nav.navigate(Routes.budget()) },
                 icon = { Icon(Icons.Default.Add, null) },
                 text = { Text(stringResource(R.string.new_budget)) },
-                containerColor = Brand.Green,
+                containerColor = Brand.Hero,
                 contentColor = androidx.compose.ui.graphics.Color.White,
             )
         },
@@ -155,6 +161,7 @@ data class BudgetForm(
     val walletId: Long? = null,
     val digits: String = "",
     val period: BudgetPeriod = BudgetPeriod.MONTHLY,
+    val alertLevels: List<Int> = BudgetAlerts.DEFAULT_LEVELS,
     val error: Int? = null,
 )
 
@@ -167,7 +174,7 @@ class BudgetEditViewModel(private val c: AppContainer) : ViewModel() {
         viewModelScope.launch {
             val b = if (id > 0) c.budgets.get(id) else null
             _form.value = if (b == null) BudgetForm(loaded = true)
-            else BudgetForm(true, b.id, b.categoryId, b.walletId, b.amount.toString(), b.period)
+            else BudgetForm(true, b.id, b.categoryId, b.walletId, b.amount.toString(), b.period, BudgetAlerts.parseLevels(b.alertLevels))
         }
     }
 
@@ -178,7 +185,12 @@ class BudgetEditViewModel(private val c: AppContainer) : ViewModel() {
         val amount = f.digits.toLongOrNull() ?: 0
         if (amount <= 0) { _form.update { it.copy(error = R.string.error_amount) }; return }
         viewModelScope.launch {
-            c.budgets.save(BudgetEntity(id = f.id, categoryId = f.categoryId, walletId = f.walletId, amount = amount, period = f.period))
+            c.budgets.save(
+                BudgetEntity(
+                    id = f.id, categoryId = f.categoryId, walletId = f.walletId, amount = amount, period = f.period,
+                    alertLevels = BudgetAlerts.formatLevels(f.alertLevels),
+                )
+            )
             onDone()
         }
     }
@@ -198,6 +210,8 @@ fun BudgetEditScreen(nav: NavController, id: Long) {
     val categories by rememberCategories(c)
     val wallets by rememberWallets(c)
     var confirmDelete by remember { mutableStateOf(false) }
+    val settingsFlow = remember(c) { c.settings.settings }
+    val alertsOn = settingsFlow.collectAsStateWithLifecycle(null).value?.budgetAlerts == true
 
     // Sentinel entries meaning "all".
     val allCats = CategoryEntity(id = -1, name = stringResource(R.string.all_expenses), type = CategoryType.EXPENSE, colorIndex = 1)
@@ -230,6 +244,21 @@ fun BudgetEditScreen(nav: NavController, id: Long) {
                 onSelect = { w -> vm.edit { it.copy(walletId = w.id.takeIf { id -> id > 0 }) } },
             )
             Text(stringResource(R.string.budget_hint), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+            Text(stringResource(R.string.budget_alerts), style = MaterialTheme.typography.titleMedium)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                BudgetAlerts.LEVEL_CHOICES.forEach { level ->
+                    FilterChip(
+                        selected = level in f.alertLevels,
+                        onClick = { vm.edit { it.copy(alertLevels = if (level in it.alertLevels) it.alertLevels - level else it.alertLevels + level) } },
+                        label = { Text("$level%") },
+                    )
+                }
+            }
+            Text(
+                stringResource(if (alertsOn) R.string.budget_alerts_hint else R.string.budget_alerts_off_hint),
+                fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             f.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, fontSize = 13.sp) }
             Button(
                 onClick = { vm.save { nav.popBackStack() } },

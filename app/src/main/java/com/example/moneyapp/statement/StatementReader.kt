@@ -1,4 +1,4 @@
-package com.example.moneyapp.statement
+package com.hiroshi.moneyapp.statement
 
 import android.content.Context
 import android.net.Uri

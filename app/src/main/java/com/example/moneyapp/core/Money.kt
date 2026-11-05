@@ -1,4 +1,4 @@
-package com.example.moneyapp.core
+package com.hiroshi.moneyapp.core
 
 /**
  * Amounts are stored as whole rupiah in a Long (no floating point, ever).

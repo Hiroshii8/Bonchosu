@@ -1,5 +1,6 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -7,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
-import androidx.core.app.NotificationManagerCompat
 
 /** Wires the auto-capture feature flag to the Android side: the listener component and its permission. */
 class CaptureController(private val context: Context) {
@@ -29,8 +29,17 @@ class CaptureController(private val context: Context) {
         }
     }
 
+    /**
+     * Checks this exact listener, not just the package: access granted to an older build's listener class
+     * (before the code moved to com.hiroshi) still lists the package but no longer delivers anything.
+     */
     fun isAccessGranted(): Boolean =
-        NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            context.getSystemService(NotificationManager::class.java).isNotificationListenerAccessGranted(component)
+        } else {
+            Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners").orEmpty()
+                .split(':').mapNotNull(ComponentName::unflattenFromString).contains(component)
+        }
 
     /** Opens the system screen where the user grants notification access. */
     fun accessSettingsIntent(): Intent =

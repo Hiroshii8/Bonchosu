@@ -1,6 +1,6 @@
-package com.example.moneyapp.statement
+package com.hiroshi.moneyapp.statement
 
-import com.example.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.TxType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

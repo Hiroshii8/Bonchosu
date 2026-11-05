@@ -1,4 +1,4 @@
-package com.example.moneyapp.data.db
+package com.hiroshi.moneyapp.data.db
 
 import androidx.room.Dao
 import androidx.room.Delete

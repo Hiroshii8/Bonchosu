@@ -1,4 +1,4 @@
-package com.example.moneyapp.core
+package com.hiroshi.moneyapp.core
 
 import java.time.DayOfWeek
 import java.time.Instant

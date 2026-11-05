@@ -1,6 +1,14 @@
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import com.hiroshi.moneyapp.applyTheme
+import com.hiroshi.moneyapp.data.settings.ThemeMode
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,17 +61,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.BuildConfig
-import com.example.moneyapp.R
-import com.example.moneyapp.capture.ParserRegistry
-import com.example.moneyapp.data.settings.AppSettings
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.components.DropdownField
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.BuildConfig
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.data.settings.AppSettings
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.components.DropdownField
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.theme.Brand
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -80,6 +87,15 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
 
     fun setAutoSave(enabled: Boolean) = viewModelScope.launch { c.settings.setAutoSaveConfident(enabled) }
     fun setHideBalances(enabled: Boolean) = viewModelScope.launch { c.settings.setHideBalances(enabled) }
+    fun setTheme(mode: ThemeMode) = viewModelScope.launch {
+        c.settings.setTheme(mode)
+        applyTheme(mode) // recreates the screen in the new theme
+    }
+    fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch {
+        c.settings.setBudgetAlerts(enabled)
+        if (enabled) c.budgetNotifier.check()
+    }
+    fun canNotify() = c.budgetNotifier.canNotify()
     fun accessGranted() = c.captureController.isAccessGranted()
 }
 
@@ -97,9 +113,21 @@ fun SettingsScreen(nav: NavController) {
     val s by vm.settings.collectAsStateWithLifecycle()
     val pending by vm.pendingCount.collectAsStateWithLifecycle()
     var granted by remember { mutableStateOf(vm.accessGranted()) }
+    var canNotify by remember { mutableStateOf(vm.canNotify()) }
     LifecycleResumeEffect(Unit) {
         granted = vm.accessGranted() // re-check after returning from Android's settings
+        canNotify = vm.canNotify()
         onPauseOrDispose { }
+    }
+    val context = LocalContext.current
+    val askNotify = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        canNotify = vm.canNotify()
+        vm.setBudgetAlerts(ok)
+    }
+    val notificationSettings = {
+        context.startActivity(
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        )
     }
 
     ScreenScaffold(title = stringResource(R.string.settings), onBack = { nav.popBackStack() }) { padding ->
@@ -131,7 +159,39 @@ fun SettingsScreen(nav: NavController) {
                             )
                         },
                     )
+                    DropdownField(
+                        label = stringResource(R.string.theme),
+                        options = ThemeMode.entries,
+                        selected = s.theme,
+                        optionLabel = {
+                            stringResource(
+                                when (it) {
+                                    ThemeMode.SYSTEM -> R.string.theme_system
+                                    ThemeMode.LIGHT -> R.string.theme_light
+                                    ThemeMode.DARK -> R.string.theme_dark
+                                }
+                            )
+                        },
+                        onSelect = vm::setTheme,
+                    )
                     SwitchRow(stringResource(R.string.hide_balances), stringResource(R.string.hide_balances_hint), s.hideBalances) { vm.setHideBalances(it) }
+                    SwitchRow(stringResource(R.string.budget_alerts), stringResource(R.string.budget_alerts_setting_hint), s.budgetAlerts) { on ->
+                        when {
+                            !on -> vm.setBudgetAlerts(false)
+                            vm.canNotify() -> vm.setBudgetAlerts(true)
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> askNotify.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            else -> { vm.setBudgetAlerts(true); notificationSettings() }
+                        }
+                    }
+                    if (s.budgetAlerts && !canNotify) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                stringResource(R.string.notifications_blocked), fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = notificationSettings) { Text(stringResource(R.string.grant)) }
+                        }
+                    }
                 }
             }
 
@@ -145,6 +205,10 @@ fun SettingsScreen(nav: NavController) {
                     NavRow(stringResource(R.string.recurring)) { nav.navigate(Routes.RECURRING) }
                     HorizontalDivider(color = Brand.Line)
                     NavRow(stringResource(R.string.statement_title)) { nav.navigate(Routes.STATEMENT_IMPORT) }
+                    HorizontalDivider(color = Brand.Line)
+                    NavRow(stringResource(R.string.customize_home)) { nav.navigate(Routes.HOME_CUSTOMIZE) }
+                    HorizontalDivider(color = Brand.Line)
+                    NavRow(stringResource(R.string.backup_title)) { nav.navigate(Routes.BACKUP) }
                 }
             }
 
@@ -169,8 +233,13 @@ fun SettingsScreen(nav: NavController) {
                         }
                         SwitchRow(stringResource(R.string.auto_save), stringResource(R.string.auto_save_hint), s.autoSaveConfident) { vm.setAutoSave(it) }
                         NavRow(stringResource(R.string.review_inbox_n, pending)) { nav.navigate(Routes.REVIEW) }
+                        NavRow(
+                            s.captureApps?.let { stringResource(R.string.capture_apps_n, it.size) } ?: stringResource(R.string.capture_apps_choose)
+                        ) { nav.navigate(Routes.CAPTURE_APPS) }
                         Text(
-                            stringResource(R.string.supported_apps, ParserRegistry.sources.joinToString(", ")),
+                            s.captureApps?.takeIf { it.isNotEmpty() }?.joinToString(", ") { it.label }
+                                ?.let { stringResource(R.string.supported_apps, it) }
+                                ?: stringResource(R.string.capture_apps_default_hint),
                             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -227,13 +296,13 @@ fun CaptureSetupScreen(nav: NavController) {
             // Before/after illustration: a bank notification becomes a categorised transaction.
             Surface(color = Brand.GreenSoft, shape = RoundedCornerShape(24.dp)) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Surface(color = Color.White, shape = RoundedCornerShape(14.dp), shadowElevation = 2.dp) {
+                    Surface(color = Brand.Card, shape = RoundedCornerShape(14.dp), shadowElevation = 2.dp) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Text(stringResource(R.string.setup_sample_source), fontSize = 11.sp, color = Brand.InkMuted, fontWeight = FontWeight.SemiBold)
                             Text(stringResource(R.string.setup_sample_text), fontSize = 13.sp)
                         }
                     }
-                    Surface(color = Color.White, shape = RoundedCornerShape(14.dp)) {
+                    Surface(color = Brand.Card, shape = RoundedCornerShape(14.dp)) {
                         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.setup_sample_result), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                             Text("−Rp 35.000", fontWeight = FontWeight.Bold)

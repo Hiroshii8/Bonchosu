@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,26 +32,26 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.core.PeriodKind
-import com.example.moneyapp.core.Periods
-import com.example.moneyapp.data.db.TransactionRow
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.data.db.WalletEntity
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.components.DropdownField
-import com.example.moneyapp.ui.components.EmptyState
-import com.example.moneyapp.ui.components.PeriodSwitcher
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.TransactionItem
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.components.formatDayHeader
-import com.example.moneyapp.ui.components.formatMonth
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.txTypeLabel
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.core.PeriodKind
+import com.hiroshi.moneyapp.core.Periods
+import com.hiroshi.moneyapp.data.db.TransactionRow
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletEntity
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.components.DropdownField
+import com.hiroshi.moneyapp.ui.components.EmptyState
+import com.hiroshi.moneyapp.ui.components.PeriodSwitcher
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.TransactionItem
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.components.formatDayHeader
+import com.hiroshi.moneyapp.ui.components.formatMonth
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.txTypeLabel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -128,7 +128,7 @@ fun ActivityScreen(nav: NavController) {
                 )
             }
             item {
-                val all = WalletEntity(id = -1, name = stringResource(R.string.all_wallets), type = com.example.moneyapp.data.db.WalletType.OTHER)
+                val all = WalletEntity(id = -1, name = stringResource(R.string.all_wallets), type = com.hiroshi.moneyapp.data.db.WalletType.OTHER)
                 DropdownField(
                     label = stringResource(R.string.wallet),
                     options = listOf(all) + wallets,

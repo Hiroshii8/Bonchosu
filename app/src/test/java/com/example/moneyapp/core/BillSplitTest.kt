@@ -1,7 +1,7 @@
-package com.example.moneyapp.core
+package com.hiroshi.moneyapp.core
 
-import com.example.moneyapp.core.BillSplit.Charge
-import com.example.moneyapp.core.BillSplit.Item
+import com.hiroshi.moneyapp.core.BillSplit.Charge
+import com.hiroshi.moneyapp.core.BillSplit.Item
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

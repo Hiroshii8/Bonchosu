@@ -1,4 +1,4 @@
-package com.example.moneyapp.data.db
+package com.hiroshi.moneyapp.data.db
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -173,6 +173,8 @@ data class BudgetEntity(
     val walletId: Long? = null,
     val amount: Long,
     val period: BudgetPeriod = BudgetPeriod.MONTHLY,
+    /** Percentages that trigger a notification, e.g. "50,75,100". Empty = no alerts for this budget. */
+    @ColumnInfo(defaultValue = "50,75,100") val alertLevels: String = "50,75,100",
 )
 
 @Entity(

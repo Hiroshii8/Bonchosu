@@ -1,13 +1,13 @@
-package com.example.moneyapp.ui
+package com.hiroshi.moneyapp.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.example.moneyapp.R
-import com.example.moneyapp.data.db.BudgetPeriod
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.Frequency
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.data.db.WalletType
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.data.db.BudgetPeriod
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.Frequency
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletType
 
 /** Built-in categories show a translated name; user categories show what the user typed. */
 @Composable

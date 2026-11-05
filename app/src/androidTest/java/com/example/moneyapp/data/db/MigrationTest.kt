@@ -1,4 +1,4 @@
-package com.example.moneyapp.data.db
+package com.hiroshi.moneyapp.data.db
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
@@ -36,6 +36,25 @@ class MigrationTest {
         db.query("SELECT initialBalance FROM wallets WHERE id = 1").use { it.moveToFirst(); assertEquals(5_000L, it.getLong(0)) }
         db.query("SELECT amount FROM transactions WHERE id = 7").use { it.moveToFirst(); assertEquals(1_250L, it.getLong(0)) }
         db.query("SELECT COUNT(*) FROM bills").use { it.moveToFirst(); assertEquals(0, it.getInt(0)) }
+        db.close()
+    }
+
+    @Test
+    fun migrating2To3GivesExistingBudgetsDefaultAlertLevels() {
+        helper.createDatabase(NAME, 2).apply {
+            insert("budgets", SQLiteDatabase.CONFLICT_ABORT, ContentValues().apply {
+                put("id", 3L); put("amount", 2_000_000L); put("period", "MONTHLY")
+            })
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(NAME, 3, true)
+
+        db.query("SELECT amount, alertLevels FROM budgets WHERE id = 3").use {
+            it.moveToFirst()
+            assertEquals(2_000_000L, it.getLong(0))
+            assertEquals("50,75,100", it.getString(1))
+        }
         db.close()
     }
 

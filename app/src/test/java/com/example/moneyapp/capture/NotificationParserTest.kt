@@ -1,7 +1,7 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.data.db.WalletType
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -117,6 +117,52 @@ class NotificationParserTest {
     @Test
     fun `superbank package uses the superbank parser`() {
         assertTrue(ParserRegistry.forPackage("id.co.bankfama.android") is SuperbankParser)
+    }
+
+    @Test
+    fun `seabank real time transfer is an expense`() {
+        val seabank = ParserRegistry.forPackage("id.co.bankbkemobile.digitalbank")!!
+        val p = seabank.parse("SeaBank", "Kamu baru melakukan transfer real-time senilai Rp35.000 pada 05 NOV 2026", 1L)
+        assertEquals(TxType.EXPENSE, p!!.type)
+        assertEquals(35_000L, p.amount)
+        assertEquals(WalletType.BANK, p.walletType)
+    }
+
+    @Test
+    fun `incoming transfer still wins over the new transfer words`() {
+        val p = bank.parse("BCA", "Kamu menerima transfer real-time senilai Rp50.000", 1L)
+        assertEquals(TxType.INCOME, p!!.type)
+    }
+
+    @Test
+    fun `before picking apps the built in list applies`() {
+        assertEquals("BCA", ParserRegistry.resolve("com.bca", null, null)?.source)
+        assertNull(ParserRegistry.resolve("com.unknown.bank", null, null))
+    }
+
+    @Test
+    fun `picked apps are the only ones read`() {
+        val chosen = listOf(CaptureApp("com.unknown.bank", "Bank Baru", walletId = 4), CaptureApp("id.co.bankfama.android", "Superbank", null))
+        assertNull(ParserRegistry.resolve("com.bca", chosen, null))
+        assertEquals("Bank Baru", ParserRegistry.resolve("com.unknown.bank", chosen, null)?.source)
+        assertTrue(ParserRegistry.resolve("id.co.bankfama.android", chosen, null) is SuperbankParser)
+    }
+
+    @Test
+    fun `a picked app follows its wallet type for top ups`() {
+        val chosen = listOf(CaptureApp("com.unknown.wallet", "Dompet", walletId = 2))
+        val asEwallet = ParserRegistry.resolve("com.unknown.wallet", chosen, WalletType.EWALLET)!!
+        assertEquals(TxType.INCOME, asEwallet.parse("Dompet", "Top up Rp50.000 berhasil", 1L)!!.type)
+        val asBank = ParserRegistry.resolve("com.unknown.wallet", chosen, null)!!
+        assertEquals(TxType.EXPENSE, asBank.parse("Dompet", "Top up Rp50.000 berhasil", 1L)!!.type)
+    }
+
+    @Test
+    fun `picked apps survive storage`() {
+        val app = CaptureApp("id.bank", "My\tBank", 7)
+        assertEquals(CaptureApp("id.bank", "My Bank", 7), CaptureApp.decode(CaptureApp.encode(app)))
+        assertEquals(CaptureApp("id.bank", "Bank", null), CaptureApp.decode(CaptureApp.encode(CaptureApp("id.bank", "Bank", null))))
+        assertNull(CaptureApp.decode("garbage"))
     }
 
     @Test

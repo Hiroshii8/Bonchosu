@@ -1,8 +1,8 @@
-package com.example.moneyapp.capture
+package com.hiroshi.moneyapp.capture
 
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.data.db.TxType
-import com.example.moneyapp.data.db.WalletType
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletType
 
 // Pure Kotlin, no Android imports: unit-test it on the JVM with real notification samples.
 
@@ -38,11 +38,7 @@ class KeywordParser(
     override fun parse(title: String, text: String, postTime: Long): ParsedCapture? {
         val full = "$title. $text".trim()
 
-        println("Full Raw Text")
         val lower = full.lowercase()
-
-        println("lowercase")
-
         if (IGNORE.any { it.containsMatchIn(lower) }) return null
 
         val topUp = TOP_UP.any { it.containsMatchIn(lower) }
@@ -53,9 +49,6 @@ class KeywordParser(
             DEBIT.any { it.containsMatchIn(lower) } -> TxType.EXPENSE
             else -> return null
         }
-
-        println("ke trigger push notif")
-        println(type)
 
         val amountRaw = AMOUNT.find(full)?.groupValues?.get(1) ?: return null
         val amount = Money.parseRupiah(amountRaw) ?: return null
@@ -98,13 +91,13 @@ class KeywordParser(
         )
 
         val DEBIT = words(
-            "debit", "didebet", "pembayaran", "pembelian", "transfer ke", "transfer keluar", "tarik tunai",
+            "debit", "didebet", "debet", "pembayaran", "pembelian", "transfer ke", "transfer keluar", "tarik tunai",
             "qris", "transaksi", "payment", "purchase", "bayar", "membayar", "paid",
+            "melakukan transfer", "transfer real-time", "transfer realtime", "transfer bi-fast", "transfer online",
             "transfer to", "transfer of", "outgoing transfer", "withdrawal", "transaction", "debited", "charged",
             "spent", "sent", "pay",
         )
 
-        /** Hints that money moved between your own accounts. */
         val OWN_TRANSFER = words("rekening sendiri", "own account", "pindah dana", "between accounts")
 
         // "Rp 1.250.000,00", "Rp50.000", "IDR 1,250,000.00"
@@ -178,7 +171,6 @@ object ParserRegistry {
         fun wallet(name: String, vararg pkgs: String) = pkgs.forEach { put(it, KeywordParser(name, WalletType.EWALLET)) }
 
 
-        val banks = arrayOf("com.bca", "com.bca.mybca.omni.android","id.bmri.livin","src.com.bni", "com.dbank.mobile")
         bank("BCA", "com.bca", "com.bca.mybca.omni.android")
         bank("Mandiri", "id.bmri.livin")
         bank("BRI", "id.co.bri.brimo")
@@ -188,6 +180,7 @@ object ParserRegistry {
         wallet("OVO", "ovo.id")
         wallet("DANA", "id.dana")
         wallet("ShopeePay", "com.shopee.id")
+        bank("Seabank", "id.co.bankbkemobile.digitalbank")
         listOf("id.co.bankfama.android").forEach { put(it, SuperbankParser()) }
     }
 
@@ -195,4 +188,35 @@ object ParserRegistry {
 
     /** Distinct source names, for the Settings / wallet-link pickers. */
     val sources: List<String> get() = parsers.values.map { it.source }.distinct()
+
+    /** Packages with built-in support: suggested in the app picker, and used until you pick apps yourself. */
+    val knownPackages: Set<String> get() = parsers.keys
+
+    /**
+     * The parser for a notification. With [chosen] apps (picked by you), only those are read: a bank with its own
+     * wording rules keeps them, any other app gets the keyword rules under its own name. [chosen] null means you
+     * haven't picked apps yet, so the built-in list applies.
+     */
+    fun resolve(pkg: String, chosen: List<CaptureApp>?, walletType: WalletType?): NotificationParser? {
+        val builtIn = parsers[pkg]
+        if (chosen == null) return builtIn
+        val app = chosen.firstOrNull { it.packageName == pkg } ?: return null
+        if (builtIn != null && builtIn !is KeywordParser) return builtIn
+        return KeywordParser(app.label, walletType ?: builtIn?.walletType ?: WalletType.BANK)
+    }
+}
+
+/** An app you picked for auto-capture. [walletId] null = a wallet named after the app, made on first capture. */
+data class CaptureApp(val packageName: String, val label: String, val walletId: Long?) {
+    companion object {
+        private const val SEP = '\t'
+
+        fun encode(app: CaptureApp) = listOf(app.packageName, app.label.replace(SEP, ' '), app.walletId?.toString().orEmpty()).joinToString(SEP.toString())
+
+        fun decode(raw: String): CaptureApp? {
+            val parts = raw.split(SEP)
+            if (parts.size < 2 || parts[0].isBlank()) return null
+            return CaptureApp(parts[0], parts[1], parts.getOrNull(2)?.toLongOrNull())
+        }
+    }
 }

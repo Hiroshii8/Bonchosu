@@ -1,7 +1,7 @@
-package com.example.moneyapp.statement
+package com.hiroshi.moneyapp.statement
 
-import com.example.moneyapp.core.Money
-import com.example.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.core.Money
+import com.hiroshi.moneyapp.data.db.TxType
 import java.time.LocalDate
 
 // Pure Kotlin, no Android imports: unit-test it on the JVM with real statement samples.

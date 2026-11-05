@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class)
 
-package com.example.moneyapp.ui.screens
+package com.hiroshi.moneyapp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -56,20 +56,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.moneyapp.AppContainer
-import com.example.moneyapp.R
-import com.example.moneyapp.data.db.CategoryEntity
-import com.example.moneyapp.data.db.CategoryType
-import com.example.moneyapp.ui.Routes
-import com.example.moneyapp.ui.categoryLabel
-import com.example.moneyapp.ui.components.CategoryBadge
-import com.example.moneyapp.ui.components.ConfirmDialog
-import com.example.moneyapp.ui.components.ScreenScaffold
-import com.example.moneyapp.ui.components.SectionCard
-import com.example.moneyapp.ui.components.SegmentedChoice
-import com.example.moneyapp.ui.components.appContainer
-import com.example.moneyapp.ui.theme.Brand
-import com.example.moneyapp.ui.theme.CategoryPalette
+import com.hiroshi.moneyapp.AppContainer
+import com.hiroshi.moneyapp.R
+import com.hiroshi.moneyapp.data.db.CategoryEntity
+import com.hiroshi.moneyapp.data.db.CategoryType
+import com.hiroshi.moneyapp.ui.Routes
+import com.hiroshi.moneyapp.ui.categoryLabel
+import com.hiroshi.moneyapp.ui.components.CategoryBadge
+import com.hiroshi.moneyapp.ui.components.ConfirmDialog
+import com.hiroshi.moneyapp.ui.components.ScreenScaffold
+import com.hiroshi.moneyapp.ui.components.SectionCard
+import com.hiroshi.moneyapp.ui.components.SegmentedChoice
+import com.hiroshi.moneyapp.ui.components.appContainer
+import com.hiroshi.moneyapp.ui.theme.Brand
+import com.hiroshi.moneyapp.ui.theme.CategoryPalette
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -93,7 +93,7 @@ fun CategoriesScreen(nav: NavController) {
                 onClick = { nav.navigate(Routes.category(type = type.name)) },
                 icon = { Icon(Icons.Default.Add, null) },
                 text = { Text(stringResource(R.string.add_category)) },
-                containerColor = Brand.Green, contentColor = Color.White,
+                containerColor = Brand.Hero, contentColor = Color.White,
             )
         },
     ) { padding ->

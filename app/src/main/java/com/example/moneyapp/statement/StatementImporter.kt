@@ -1,15 +1,15 @@
-package com.example.moneyapp.statement
+package com.hiroshi.moneyapp.statement
 
 import androidx.room.withTransaction
-import com.example.moneyapp.capture.CategoryGuess
-import com.example.moneyapp.capture.Categorizer
-import com.example.moneyapp.capture.MerchantKey
-import com.example.moneyapp.core.Periods
-import com.example.moneyapp.data.TransactionRepository
-import com.example.moneyapp.data.db.AppDatabase
-import com.example.moneyapp.data.db.TransactionEntity
-import com.example.moneyapp.data.db.TxSource
-import com.example.moneyapp.data.db.TxStatus
+import com.hiroshi.moneyapp.capture.CategoryGuess
+import com.hiroshi.moneyapp.capture.Categorizer
+import com.hiroshi.moneyapp.capture.MerchantKey
+import com.hiroshi.moneyapp.core.Periods
+import com.hiroshi.moneyapp.data.TransactionRepository
+import com.hiroshi.moneyapp.data.db.AppDatabase
+import com.hiroshi.moneyapp.data.db.TransactionEntity
+import com.hiroshi.moneyapp.data.db.TxSource
+import com.hiroshi.moneyapp.data.db.TxStatus
 
 /** Saves statement rows as PENDING_REVIEW, so they don't touch balances or budgets until confirmed. */
 class StatementImporter(
