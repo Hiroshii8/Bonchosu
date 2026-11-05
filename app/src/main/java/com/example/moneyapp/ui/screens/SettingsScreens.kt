@@ -217,7 +217,12 @@ fun SettingsScreen(nav: NavController) {
                 SectionCard {
                     SwitchRow(stringResource(R.string.flag_auto_capture), stringResource(R.string.flag_auto_capture_hint), s.autoCaptureEnabled) { on ->
                         vm.setAutoCapture(on)
-                        if (on && !vm.accessGranted()) nav.navigate(Routes.CAPTURE_SETUP)
+                        when {
+                            !on -> Unit
+                            !vm.accessGranted() -> nav.navigate(Routes.CAPTURE_SETUP)
+                            // Nothing is read until apps are picked, so go straight there.
+                            s.captureApps.isNullOrEmpty() -> nav.navigate(Routes.CAPTURE_APPS)
+                        }
                     }
                     if (s.autoCaptureEnabled) {
                         HorizontalDivider(color = Brand.Line)
@@ -234,13 +239,15 @@ fun SettingsScreen(nav: NavController) {
                         SwitchRow(stringResource(R.string.auto_save), stringResource(R.string.auto_save_hint), s.autoSaveConfident) { vm.setAutoSave(it) }
                         NavRow(stringResource(R.string.review_inbox_n, pending)) { nav.navigate(Routes.REVIEW) }
                         NavRow(
-                            s.captureApps?.let { stringResource(R.string.capture_apps_n, it.size) } ?: stringResource(R.string.capture_apps_choose)
+                            s.captureApps?.takeIf { it.isNotEmpty() }?.let { stringResource(R.string.capture_apps_n, it.size) }
+                                ?: stringResource(R.string.capture_apps_choose)
                         ) { nav.navigate(Routes.CAPTURE_APPS) }
+                        val picked = s.captureApps.orEmpty()
                         Text(
-                            s.captureApps?.takeIf { it.isNotEmpty() }?.joinToString(", ") { it.label }
-                                ?.let { stringResource(R.string.supported_apps, it) }
-                                ?: stringResource(R.string.capture_apps_default_hint),
-                            fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            if (picked.isEmpty()) stringResource(R.string.capture_apps_none_hint)
+                            else stringResource(R.string.supported_apps, picked.joinToString(", ") { it.label }),
+                            fontSize = 12.sp,
+                            color = if (picked.isEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

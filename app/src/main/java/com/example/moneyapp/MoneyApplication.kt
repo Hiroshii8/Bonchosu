@@ -2,6 +2,7 @@ package com.hiroshi.moneyapp
 
 import android.app.Application
 import com.hiroshi.moneyapp.backup.BackupManager
+import com.hiroshi.moneyapp.capture.InstalledApps
 import com.hiroshi.moneyapp.recurring.RecurringWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,8 @@ class MoneyApplication : Application() {
         appScope.launch {
             // Catch up recurring transactions right away instead of waiting for the daily job.
             container.recurring.runDue()
+            // Installs from before the app picker: keep capturing from the banks they were already capturing from.
+            InstalledApps.pickKnownAppsOnce(this@MoneyApplication, container.settings, container.db)
             // Keep the listener component in sync with the feature flag (e.g. after restoring data).
             container.captureController.applyFlag(container.settings.current().autoCaptureEnabled)
         }

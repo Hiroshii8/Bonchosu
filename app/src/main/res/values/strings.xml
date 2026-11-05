@@ -146,8 +146,8 @@
     <string name="exclude_from_total">Exclude from total</string>
     <string name="exclude_from_total_hint">e.g. savings you don\'t want in your day-to-day total</string>
     <string name="capture_source">Auto-capture source</string>
-    <string name="capture_source_none">None (manual only)</string>
-    <string name="capture_source_hint">Notifications from this app are recorded in this wallet.</string>
+    <string name="wallet_capture_from">Captured from %1$s</string>
+    <string name="wallet_capture_none">No apps record into this wallet.</string>
     <string name="archive_wallet">Archive</string>
     <string name="archive_wallet_hint">Hide it from pickers and the total, keep its history</string>
     <string name="delete_wallet_q">Delete this wallet?</string>
@@ -327,7 +327,7 @@
     <string name="capture_apps_title">Apps to capture from</string>
     <string name="capture_apps_choose">Choose apps</string>
     <string name="capture_apps_n">Apps to capture from (%1$d)</string>
-    <string name="capture_apps_default_hint">Using the built-in list of banks and e-wallets until you choose apps.</string>
+    <string name="capture_apps_none_hint">Nothing is captured until you choose apps.</string>
     <string name="capture_apps_intro">Tick your bank and e-wallet apps. Only their notifications are read, and each one goes to the wallet you pick.</string>
     <string name="capture_apps_search">Search apps</string>
     <string name="capture_apps_suggested">Supported out of the box</string>

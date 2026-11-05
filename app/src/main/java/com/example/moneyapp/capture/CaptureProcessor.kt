@@ -27,8 +27,10 @@ class CaptureProcessor(
         val s = settings.current()
         if (!s.autoCaptureEnabled) return null // feature flag: off means we never touch notifications
 
-        val linked = s.captureApps?.firstOrNull { it.packageName == packageName }?.walletId?.let { db.walletDao().get(it) }
-        val parser = ParserRegistry.resolve(packageName, s.captureApps, linked?.type) ?: return null
+        // Only apps you picked are read; with none picked yet, nothing is.
+        val apps = s.captureApps ?: return null
+        val linked = apps.firstOrNull { it.packageName == packageName }?.walletId?.let { db.walletDao().get(it) }
+        val parser = ParserRegistry.resolve(packageName, apps, linked?.type) ?: return null
         val parsed = parser.parse(title, text, postTime) ?: return null
         return mutex.withLock { save(parsed, s.autoSaveConfident, linked) }
     }

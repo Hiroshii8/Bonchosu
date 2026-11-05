@@ -1,7 +1,6 @@
 package com.hiroshi.moneyapp.ui.screens
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +46,8 @@ import androidx.navigation.NavController
 import com.hiroshi.moneyapp.AppContainer
 import com.hiroshi.moneyapp.R
 import com.hiroshi.moneyapp.capture.CaptureApp
-import com.hiroshi.moneyapp.capture.ParserRegistry
+import com.hiroshi.moneyapp.capture.InstalledApp
+import com.hiroshi.moneyapp.capture.InstalledApps
 import com.hiroshi.moneyapp.data.db.WalletEntity
 import com.hiroshi.moneyapp.ui.components.DropdownField
 import com.hiroshi.moneyapp.ui.components.ScreenScaffold
@@ -60,9 +60,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** An app on the phone that has a home-screen icon. */
-data class InstalledApp(val packageName: String, val label: String, val suggested: Boolean)
-
 data class CaptureAppsUi(val loading: Boolean = true, val apps: List<InstalledApp> = emptyList(), val chosen: List<CaptureApp> = emptyList())
 
 class CaptureAppsViewModel(private val c: AppContainer, context: Context) : ViewModel() {
@@ -70,13 +67,9 @@ class CaptureAppsViewModel(private val c: AppContainer, context: Context) : View
 
     init {
         viewModelScope.launch {
-            val installed = withContext(Dispatchers.IO) { launcherApps(context) }
-            val saved = c.settings.current().captureApps
-            // First visit: start from the built-in banks that are actually installed, linked to their existing wallets.
-            val chosen = saved ?: installed.filter { it.suggested }.map { app ->
-                val source = ParserRegistry.forPackage(app.packageName)?.source
-                CaptureApp(app.packageName, app.label, source?.let { c.db.walletDao().findByCaptureSource(it) }?.id)
-            }
+            val installed = withContext(Dispatchers.IO) { InstalledApps.withLauncher(context) }
+            // Nothing is ticked for you: supported apps are only suggested, at the top of the list.
+            val chosen = c.settings.current().captureApps.orEmpty()
             ui.value = CaptureAppsUi(
                 loading = false,
                 // Picked apps first, then suggestions, then everything else A–Z.
@@ -86,17 +79,6 @@ class CaptureAppsViewModel(private val c: AppContainer, context: Context) : View
                 chosen = chosen,
             )
         }
-    }
-
-    /** Uses a launcher query instead of reading every installed package, which Google Play restricts. */
-    private fun launcherApps(context: Context): List<InstalledApp> {
-        val pm = context.packageManager
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        return pm.queryIntentActivities(intent, 0)
-            .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
-            .filter { (pkg, _) -> pkg != context.packageName }
-            .distinctBy { it.first }
-            .map { (pkg, label) -> InstalledApp(pkg, label, pkg in ParserRegistry.knownPackages) }
     }
 
     fun toggle(app: InstalledApp) = update { chosen ->

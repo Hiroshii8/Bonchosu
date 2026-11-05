@@ -2,6 +2,7 @@ package com.hiroshi.moneyapp.capture
 
 import com.hiroshi.moneyapp.core.Money
 import com.hiroshi.moneyapp.data.db.TxType
+import com.hiroshi.moneyapp.data.db.WalletEntity
 import com.hiroshi.moneyapp.data.db.WalletType
 
 // Pure Kotlin, no Android imports: unit-test it on the JVM with real notification samples.
@@ -161,49 +162,61 @@ class SuperbankParser : NotificationParser {
     }
 }
 
+/**
+ * A banking app we know about.
+ * - [name]: what older versions called it, which is also the wallet they created for it.
+ * - [walletType]: used when the app isn't linked to a wallet.
+ * - [parser]: set only for apps whose wording needs their own rules.
+ */
+data class KnownApp(val name: String, val walletType: WalletType, val parser: NotificationParser? = null)
+
+/** Only apps you pick are read. This list only adds suggestions, wallet types and special wording rules. */
 object ParserRegistry {
     /**
-     * Package name → parser. ⚠️ Verify package names on your own phone with the debug log in
-     * TransactionListenerService (they're a best guess and banks sometimes ship new apps).
+     * Package name → known app. ⚠️ Package names are a best guess; check them on a real phone with the debug log in
+     * TransactionListenerService, because banks sometimes ship new apps.
      */
-    private val parsers: Map<String, NotificationParser> = buildMap {
-        fun bank(name: String, vararg pkgs: String) = pkgs.forEach { put(it, KeywordParser(name, WalletType.BANK)) }
-        fun wallet(name: String, vararg pkgs: String) = pkgs.forEach { put(it, KeywordParser(name, WalletType.EWALLET)) }
-
+    private val known: Map<String, KnownApp> = buildMap {
+        fun bank(name: String, vararg pkgs: String) = pkgs.forEach { put(it, KnownApp(name, WalletType.BANK)) }
+        fun wallet(name: String, vararg pkgs: String) = pkgs.forEach { put(it, KnownApp(name, WalletType.EWALLET)) }
 
         bank("BCA", "com.bca", "com.bca.mybca.omni.android")
         bank("Mandiri", "id.bmri.livin")
         bank("BRI", "id.co.bri.brimo")
         bank("BNI", "src.com.bni")
         bank("Danamon", "com.dbank.mobile")
+        bank("Seabank", "id.co.bankbkemobile.digitalbank")
         wallet("GoPay", "com.gojek.gopay", "com.gojek.app")
         wallet("OVO", "ovo.id")
         wallet("DANA", "id.dana")
         wallet("ShopeePay", "com.shopee.id")
-        bank("Seabank", "id.co.bankbkemobile.digitalbank")
-        listOf("id.co.bankfama.android").forEach { put(it, SuperbankParser()) }
+        put("id.co.bankfama.android", KnownApp("Superbank", WalletType.BANK, SuperbankParser()))
     }
 
-    fun forPackage(pkg: String): NotificationParser? = parsers[pkg]
+    fun known(pkg: String): KnownApp? = known[pkg]
 
-    /** Distinct source names, for the Settings / wallet-link pickers. */
-    val sources: List<String> get() = parsers.values.map { it.source }.distinct()
-
-    /** Packages with built-in support: suggested in the app picker, and used until you pick apps yourself. */
-    val knownPackages: Set<String> get() = parsers.keys
+    /** Suggested in the app picker. */
+    val knownPackages: Set<String> get() = known.keys
 
     /**
-     * The parser for a notification. With [chosen] apps (picked by you), only those are read: a bank with its own
-     * wording rules keeps them, any other app gets the keyword rules under its own name. [chosen] null means you
-     * haven't picked apps yet, so the built-in list applies.
+     * The parser for a notification from [pkg], or null if you didn't pick that app. An app with its own wording
+     * rules keeps them. Any other app gets the keyword rules under its label, as a bank unless its wallet says otherwise.
      */
-    fun resolve(pkg: String, chosen: List<CaptureApp>?, walletType: WalletType?): NotificationParser? {
-        val builtIn = parsers[pkg]
-        if (chosen == null) return builtIn
+    fun resolve(pkg: String, chosen: List<CaptureApp>, walletType: WalletType?): NotificationParser? {
         val app = chosen.firstOrNull { it.packageName == pkg } ?: return null
-        if (builtIn != null && builtIn !is KeywordParser) return builtIn
-        return KeywordParser(app.label, walletType ?: builtIn?.walletType ?: WalletType.BANK)
+        val k = known[pkg]
+        return k?.parser ?: KeywordParser(app.label, walletType ?: k?.walletType ?: WalletType.BANK)
     }
+}
+
+/**
+ * The picked apps that record into [wallet]: linked to it directly, or not linked to any wallet and recording into
+ * the one created for them (named after the app).
+ */
+fun List<CaptureApp>.recordingInto(wallet: WalletEntity): List<CaptureApp> = filter { app ->
+    app.walletId == wallet.id ||
+        (app.walletId == null && wallet.captureSource != null &&
+            (wallet.captureSource == app.label || wallet.captureSource == ParserRegistry.known(app.packageName)?.parser?.source))
 }
 
 /** An app you picked for auto-capture. [walletId] null = a wallet named after the app, made on first capture. */
