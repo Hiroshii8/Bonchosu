@@ -1,17 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Placeholder icon: a wallet. Replace via Android Studio's Image Asset tool. -->
+<!-- Bonchosu "Maneki panik": a lucky cat realising it's the end of the month. Drawn inside the 66dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M34,40h40a4,4 0,0 1,4 4v24a4,4 0,0 1,-4 4H34a4,4 0,0 1,-4 -4V44a4,4 0,0 1,4 -4z" />
-    <path
-        android:fillColor="#0E5A47"
-        android:pathData="M62,52h16v10H62a5,5 0,0 1,0 -10z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M64,55a2,2 0,1 0,0.01 0z" />
+
+    <!-- Ears -->
+    <path android:fillColor="#FFFFFF" android:pathData="M33,52 L35.5,28.5 L52,42 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M75,52 L72.5,28.5 L56,42 Z" />
+    <path android:fillColor="#F7A8C4" android:pathData="M37.5,44 L38.8,33.5 L47,40.5 Z" />
+    <path android:fillColor="#F7A8C4" android:pathData="M70.5,44 L69.2,33.5 L61,40.5 Z" />
+
+    <!-- Head -->
+    <path android:fillColor="#FFFFFF" android:pathData="M31,58 a23,19 0 1,0 46,0 a23,19 0 1,0 -46,0 z" />
+
+    <!-- Squeezed eyes: > < -->
+    <path android:strokeColor="#1F2430" android:strokeWidth="2.6" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M40,51.5 L46.5,55 L40,58.5" />
+    <path android:strokeColor="#1F2430" android:strokeWidth="2.6" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M68,51.5 L61.5,55 L68,58.5" />
+
+    <!-- Blush -->
+    <path android:fillColor="#F7A8C4" android:pathData="M37,63 a3.6,2.3 0 1,0 7.2,0 a3.6,2.3 0 1,0 -7.2,0 z" />
+    <path android:fillColor="#F7A8C4" android:pathData="M63.8,63 a3.6,2.3 0 1,0 7.2,0 a3.6,2.3 0 1,0 -7.2,0 z" />
+
+    <!-- Wobbly mouth -->
+    <path android:strokeColor="#1F2430" android:strokeWidth="1.9" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M49,61.5 q2.5,3.2 5,0 q2.5,3.2 5,0" />
+
+    <!-- Collar and bell -->
+    <path android:fillColor="#D93A3A" android:pathData="M37,73.5 h34 a2.6,2.6 0 0,1 0,5.2 h-34 a2.6,2.6 0 0,1 0,-5.2 z" />
+    <path android:fillColor="#F2C14E" android:strokeColor="#B7861C" android:strokeWidth="1"
+        android:pathData="M49.2,79.5 a4.8,4.8 0 1,0 9.6,0 a4.8,4.8 0 1,0 -9.6,0 z" />
+    <path android:strokeColor="#B7861C" android:strokeWidth="1.2" android:strokeLineCap="round"
+        android:pathData="M51.6,80 h4.8" />
+
+    <!-- Sweat drop -->
+    <path android:fillColor="#7CC8F2"
+        android:pathData="M80.5,29 C80.5,29 76.3,34.2 76.3,37.4 a4.2,4.2 0 0,0 8.4,0 C84.7,34.2 80.5,29 80.5,29 z" />
 </vector>
