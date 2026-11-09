@@ -1,114 +1,147 @@
-# MoneyApp
+# Bonchosu
 
-A money manager for Android (Money Lover-style) with an optional **auto-capture** feature that logs
-bank and e-wallet payments from their notifications. Auto-capture sits behind a feature flag in
-**Settings → Labs** and is **off by default**.
+**A money manager for Android that does the boring typing for you.**
+*"Biar nggak boncos lagi."*
 
-Kotlin · Jetpack Compose · Room · DataStore · WorkManager · min SDK 26 · English + Bahasa Indonesia
+Bonchosu keeps track of where your money goes. Instead of typing every payment in by hand, it can read your
+bank notifications, your e-statements and photos of your receipts, then asks you to confirm before anything counts.
+Everything stays on your phone.
 
-## Run it
+Available in **English** and **Bahasa Indonesia**.
 
-1. Unzip, then in Android Studio: **File → Open** → pick the `MoneyApp` folder.
-2. Let Gradle sync finish (first sync downloads a lot). If Studio offers to upgrade AGP/Kotlin, you can accept,
-   but bump `kotlin` and `ksp` together in `gradle/libs.versions.toml` (the KSP version starts with the Kotlin version).
-3. Press ▶ with your phone connected.
-4. Unit tests: right-click `app/src/test` → **Run tests** (no phone needed).
+<p align="center">
+  <img src="docs/screenshots/home.png" width="250" alt="Home: total balance with this month's income and expense">
+  &nbsp;
+  <img src="docs/screenshots/history.png" width="250" alt="History grouped by day, with search and filters">
+  &nbsp;
+  <img src="docs/screenshots/new-transaction.png" width="250" alt="New transaction with a number pad and category bubbles">
+</p>
 
-The package is `com.hiroshi.moneyapp`. To rename: change `namespace`/`applicationId` in `app/build.gradle.kts`,
-then right-click the `com.hiroshi.moneyapp` package → **Refactor → Rename**.
+---
 
-## What's in v1
+## What it can do
 
-| Area | Features |
-|---|---|
-| Wallets | Cash / bank / e-wallet / credit card, starting balance (can be negative), exclude from total, archive, live balances |
-| Transactions | Expense / income / transfer, category, date, note, exclude from reports, search, filter by wallet/type/month |
-| Categories | 18 built-in (translated), add your own, pick a colour, built-ins are hidden instead of deleted |
-| Budgets | Per category or all expenses, per wallet or all, weekly/monthly, "safe to spend per day", near/over warnings |
-| Recurring | Daily/weekly/monthly/yearly every N, start/end date, pause; missed runs are caught up; "Repeat" on a new transaction |
-| Reports | Week/month/year, income vs expense, category donut, 6-month trend |
-| Settings | Language switch (system / English / Indonesian), hide balances, feature flags |
-| **Auto-capture (flag)** | Notification listener → parser per app → de-dup → category guess → review inbox (or auto-save when confident) |
+### See your money at a glance
+- **Home** shows your total balance, this month's income and expense, your monthly budget and your latest
+  transactions. Tap the month to look back at earlier months.
+- **History** lists everything by day. Search by shop, note or amount, and filter by expense, income or
+  auto-captured.
+- **Stats** break spending down by category and show the last 6 months.
+- **Wallets** for cash, bank accounts, e-wallets and credit cards, with live balances.
+- **Hide balances** with one tap when you're in public.
 
-## How the feature flag works
+### Make it yours
+- **Light, dark or follow your phone**, plus a **pure black** mode that saves battery on OLED screens.
+- **Four accent colours**: Emerald, Blue, Violet and Orange. On Android 12 and newer, **dynamic colour** can take
+  the colours from your wallpaper instead.
+- **A live preview** shows the change before you leave the screen, and the whole app recolours instantly.
+- **Customise Home**: choose which cards show, in what order, and which figures the balance card shows.
 
-`AppSettings.autoCaptureEnabled` (DataStore) is the flag. Turning it on or off does three things:
+<p align="center">
+  <img src="docs/screenshots/appearance.png" width="250" alt="Appearance: live preview, theme, pure black, dynamic colour and accent colours">
+  &nbsp;
+  <img src="docs/screenshots/home-budget.png" width="250" alt="Monthly budget, quick actions and recent transactions">
+</p>
 
-1. **The listener component itself is enabled/disabled** (`CaptureController.applyFlag`). The service is declared
-   `android:enabled="false"` in the manifest, so with the flag off Android never starts it and the app doesn't even
-   appear in the system "Notification access" list.
-2. `CaptureProcessor.handle` checks the flag again before reading anything (belt and braces).
-3. The UI hides everything capture-related: the review banner on Home, the capture source on wallets,
-   and the capture settings.
+### Record spending without typing
+- **Quick add.** The **+** button opens a number pad. Type the amount, tap a category and save.
+- **Bank and e-wallet notifications.** Turn on auto-capture, pick your banking apps (BCA, Mandiri, BRI, BNI,
+  SeaBank, Superbank, GoPay, OVO, DANA, ShopeePay or any other), and payments are noted down as they happen.
+- **E-statements.** Pick the PDF or screenshots from your bank. The app reads every row, spots the ones you
+  already have, and works with any Indonesian bank. Password-protected PDFs are fine.
+- **Receipt photos.** Pick several photos at once. Each receipt becomes one expense with the shop, date and total.
+  Photos that aren't receipts are skipped, and the same receipt twice is caught.
 
-Turning it on sends you to a setup screen that explains what's read and opens Android's permission page.
+Nothing goes straight into your balance: new items wait in a **review inbox** (the bell on Home) until you confirm them.
 
-## Architecture (backend terms)
+<p align="center">
+  <img src="docs/screenshots/scan-receipts.png" width="250" alt="Three receipts found from four photos, ready to send to review">
+  &nbsp;
+  <img src="docs/screenshots/review.png" width="250" alt="Review inbox with transactions waiting to be confirmed">
+</p>
 
-```
-ui/screens/*        Compose screen + its ViewModel (controller + view model)
-data/Repositories   service layer, the only thing ViewModels call
-data/db             Room entities + DAOs (JPA-like), SQL lives in Daos.kt
-data/settings       DataStore key-value settings + feature flags
-capture/            notification consumer → parser (strategy per app) → processor
-core/               pure Kotlin logic (money, periods, budgets, recurrence), unit-tested
-AppContainer        manual dependency injection (one place that wires everything)
-```
+### Categories that sort themselves
+- The app guesses the category: "Indomaret" is Groceries, "GoFood" is Food & Drink, "PLN" is Bills.
+- **It learns.** Fix a category once and that shop goes to the right place next time.
+- **Keyword rules.** Add your own words, like *"laundry" → Bills* or *"kos" → Family*.
+  Any transaction mentioning that word gets that category.
 
-- Money is stored as whole rupiah in `Long`. Never floats.
-- Balances are computed in SQL from the starting balance + confirmed transactions, so they can't drift.
-- Captured transactions are saved as `PENDING_REVIEW` and don't touch balances or budgets until confirmed.
-- When you confirm or fix a capture, the merchant → category choice is learned (`merchant_rules` table).
+<p align="center">
+  <img src="docs/screenshots/keyword-rules.png" width="250" alt="Keyword rules: laundry goes to Bills and Utilities">
+  &nbsp;
+  <img src="docs/screenshots/reports.png" width="250" alt="Stats: spending by category and the last 6 months">
+</p>
 
-## Before you rely on auto-capture
+### Split a bill fairly
+Snap the restaurant receipt, say how many people were there and tap who had what.
+Tax, service charge and discounts are shared out by what each person ordered, so nobody pays for someone
+else's steak. Only your own orders count as your spending, and the app keeps track of who still owes you.
 
-Which apps are read: Settings → Auto-capture → **Apps to capture from**. You tick installed apps (listed through a
-launcher-intent `<queries>`, not `QUERY_ALL_PACKAGES`) and link each to a wallet. Until you pick any, the built-in
-`ParserRegistry` list applies. Picked apps use the keyword rules unless they have a dedicated parser (e.g. Superbank).
+<p align="center">
+  <img src="docs/screenshots/split-bill-receipt.png" width="250" alt="Receipt read into orders, matching the printed total">
+  &nbsp;
+  <img src="docs/screenshots/split-bill-result.png" width="250" alt="The split: each person's share including tax">
+</p>
 
-The parser wording and the built-in **package names are best guesses** (`capture/NotificationParser.kt`):
+### Stay on budget
+- Budgets per category or for everything, weekly or monthly. Home shows how much is used, how much is left and
+  how many days to go.
+- A **notification** when you reach 50%, 75% and 100%, or any levels you choose.
+- **Recurring** payments like rent, subscriptions and salary are added automatically.
 
-1. Set `DEBUG_CAPTURE = true` in `TransactionListenerService`, run a debug build, make a few real payments.
-2. In Logcat filter `NotifCapture` and copy the real notification texts and package names.
-3. Fix `ParserRegistry` package names, add the texts to `NotificationParserTest` as fixtures, tune until green.
-4. Set `DEBUG_CAPTURE` back to `false` (it logs every app's notifications).
+### Keep your data safe
+**Backup & restore** saves everything (wallets, transactions, budgets, split bills, keyword rules and settings,
+including your theme) into one file. Save it to Google Drive and load it back on a new phone.
 
-## E-statement import
+<p align="center">
+  <img src="docs/screenshots/backup.png" width="250" alt="Backup and restore screen">
+</p>
 
-Settings → Manage → Import e-statement. Pick a PDF or screenshots; everything runs on the device.
+---
 
-```
-statement/StatementReader    PDF text layer (PDFBox), or on-device OCR (ML Kit) for screenshots and scans
-statement/StatementParser    text lines → rows, without knowing the bank (pure Kotlin, unit-tested)
-statement/StatementImporter  duplicate check + save as PENDING_REVIEW, source IMPORT
-```
+## Your privacy
 
-- There are no per-bank templates: a row is a line starting with a date and carrying an amount.
-- Direction comes from running balance arithmetic, then DB/CR markers, +/− signs, debit/credit columns, then wording.
-- When the statement prints both, opening + rows = closing is checked and shown on the preview.
-- The samples in `StatementParserTest` are made up. Add real ones, with names and account numbers removed.
+- **Everything stays on your phone.** There's no account, no server and no ads. Receipts, statements and
+  notifications are read on the device itself.
+- **Auto-capture is off until you turn it on**, and it only reads notifications from the apps you pick.
+- **Nothing counts until you say so.** Anything read automatically waits in the review inbox first.
+- Photos and PDFs are only read, never kept, and PDF passwords aren't saved.
+- Backups aren't encrypted, so keep the file somewhere private.
 
-## Split bill
+---
 
-Home → Split bill. Scan or type a receipt, set how many people, assign each order, then tick the orders that are yours.
+## Getting started
 
-- `core/BillSplit`: tax, service and discounts by order size, delivery and packing equally; whole rupiah that always add up.
-- `bill/ReceiptParser`: OCR lines → orders and fees, checked against the printed total (pure Kotlin, unit-tested).
-- `data/BillRepository`: nothing is written until you confirm. If you paid, your orders are a normal expense and the
-  rest is an expense hidden from reports until repaid. If someone else paid, nothing moves until you pay them back.
+1. Install the app and open it. You start with a Cash wallet.
+2. Add your other wallets: **Settings → Wallets → Add wallet** (or tap "Total balance" on Home).
+3. Tap **+** to add a payment by hand, or use the quick actions on Home:
+   - **Scan receipt** to turn receipt photos into expenses
+   - **Auto-capture** to read bank notifications
+   - **Settings → Import e-statement** for your monthly statement
+4. When the bell on Home shows a dot, open the review inbox and tap **Confirm**.
+5. Make it yours in **Settings → Appearance**.
+6. Every so often: **Settings → Backup & restore → Save backup file**, then pick Google Drive.
 
-## Database changes
+## Questions
 
-Schemas are exported to `app/schemas`. Every schema change needs a migration, because there's deliberately no
-destructive fallback. `MigrationTest` uses its own database file. Run it without `connectedAndroidTest`,
-which uninstalls the app and wipes its data afterwards:
+**My bank's notifications aren't picked up.**
+Check that the app is ticked in **Settings → Labs → Apps to capture from**, and that notification access shows
+"Granted". Some banks word things unusually. Payments the app doesn't recognise are simply skipped, never guessed.
 
-```
-gradlew :app:installDebug :app:installDebugAndroidTest
-adb shell am instrument -w com.hiroshi.moneyapp.test/androidx.test.runner.AndroidJUnitRunner
-```
+**A category keeps coming out wrong.**
+Fix it once in the review inbox and the app remembers that shop. For a whole group of shops, add a keyword rule.
 
-## Next (v2 ideas)
+**Where did Budgets go?**
+The monthly budget sits on Home; tap it to see all budgets. They're also in **Settings → Budgets**.
 
-Savings goals, debts/loans, bill reminders, CSV export and backup,
-dark theme, multi-currency.
+**I got a new phone.**
+On the old phone, save a backup to Google Drive. On the new one, install the app and choose
+**Backup & restore → Choose backup file**. Turn on notification access again, because Android doesn't let apps
+carry that permission over.
+
+**Does it work on iPhone?**
+Not yet. iPhones don't allow apps to read other apps' notifications, so auto-capture couldn't work there.
+
+---
+
+For developers: how to build, test and change the app is in [docs/DEVELOPERS.md](docs/DEVELOPERS.md).

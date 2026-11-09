@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MoneyApp"
+rootProject.name = "Bonchosu"
 include(":app")

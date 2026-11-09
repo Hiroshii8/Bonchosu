@@ -6,13 +6,12 @@ plugins {
 }
 
 android {
-    namespace = "com.hiroshi.moneyapp"
+    namespace = "com.hiroshi.bonchosu"
     compileSdk = 35
 
     defaultConfig {
-        // Kept as the old ID so this build updates the installed app and keeps its data.
-        // Play rejects com.example IDs: switch to "com.hiroshi.moneyapp" once backup/restore exists.
-        applicationId = "com.example.moneyapp"
+        // New ID (was com.example.moneyapp): it installs as a separate app. Move data across with Backup & restore.
+        applicationId = "com.hiroshi.bonchosu"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

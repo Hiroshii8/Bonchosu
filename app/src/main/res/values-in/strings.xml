@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="capture_service_label">Pencatat transaksi MoneyApp</string>
+    <string name="capture_service_label">Pencatat transaksi Bonchosu</string>
     <string name="default_wallet_cash">Tunai</string>
     <string name="tab_home">Beranda</string>
-    <string name="tab_activity">Aktivitas</string>
+    <string name="tab_activity">Riwayat</string>
     <string name="tab_budgets">Anggaran</string>
-    <string name="tab_reports">Laporan</string>
+    <string name="tab_reports">Statistik</string>
+    <string name="tab_settings">Pengaturan</string>
     <string name="add_transaction">Tambah transaksi</string>
     <string name="back">Kembali</string>
     <string name="ok">OK</string>
@@ -114,7 +115,7 @@
     <string name="error_name">Masukkan nama.</string>
     <string name="error_end_date">Tanggal selesai harus setelah tanggal mulai.</string>
     <string name="review_title">Cek transaksi tercatat</string>
-    <string name="review_intro">Dari notifikasi bank &amp; dompet digitalmu serta e-statement yang diimpor. Belum dihitung sampai kamu konfirmasi.</string>
+    <string name="review_intro">Dari notifikasi bank &amp; dompet digitalmu e-statement yang diimpor, serta struk yang dipindai. Belum dihitung sampai kamu konfirmasi.</string>
     <string name="all_caught_up">Semua sudah dicek.</string>
     <string name="unknown_merchant">Merchant nggak dikenal</string>
     <string name="pick_category">Pilih kategori</string>
@@ -339,11 +340,111 @@
     <string name="backup_restore_hint">Mengganti semua isi aplikasi dengan cadangan. Simpan cadangan data sekarang dulu kalau mungkin masih perlu.</string>
     <string name="backup_restore">Pilih file cadangan</string>
     <string name="backup_saved">Cadangan tersimpan.</string>
-    <string name="backup_error_invalid">File itu bukan cadangan MoneyApp.</string>
+    <string name="backup_error_invalid">File itu bukan cadangan Bonchosu.</string>
     <string name="backup_error_newer">Cadangan itu dibuat versi aplikasi yang lebih baru. Perbarui aplikasi, lalu pulihkan.</string>
     <string name="backup_error_generic">Ada yang salah. Tidak ada yang diubah.</string>
     <string name="backup_restore_confirm_title">Pulihkan cadangan ini?</string>
     <string name="backup_restore_confirm_body">Semua data di aplikasi diganti dengan cadangan. Aplikasi akan dimulai ulang untuk menyelesaikannya.</string>
     <string name="backup_restore_confirm">Pulihkan dan mulai ulang</string>
     <string name="backup_privacy">Cadangan tidak dienkripsi, jadi simpan di tempat pribadi. Akses notifikasi tidak ikut dicadangkan dan perlu diizinkan lagi di HP baru.</string>
-</resources>
+
+    <!-- Asal transaksi (chip kecil di daftar) -->
+    <string name="chip_auto">Otomatis · %1$s</string>
+    <string name="chip_scan">Pindai</string>
+    <string name="chip_manual">Manual</string>
+    <string name="chip_repeat">Rutin</string>
+    <string name="chip_review">Cek</string>
+
+    <!-- Pindai struk -->
+    <string name="receipts_title">Pindai struk</string>
+    <string name="receipts_home_hint">Pilih foto struk, tiap struk jadi satu pengeluaran</string>
+    <string name="receipts_intro">Pilih satu atau beberapa foto struk. Tiap struk jadi satu pengeluaran berisi toko, tanggal, dan total, dan kamu cek dulu sebelum disimpan. Foto yang bukan struk dilewati.</string>
+    <string name="receipts_pick">Pilih foto</string>
+    <string name="receipts_pick_other">Pilih foto lain</string>
+    <string name="receipts_none">Tidak ada struk di foto-foto itu. Coba foto yang lebih jelas dengan total terlihat.</string>
+    <string name="receipts_check">Cek nama toko dan total tiap struk. Yang dicentang masuk ke kotak cek.</string>
+    <string name="receipts_photo_date">tanpa tanggal di struk, tanggal foto dipakai</string>
+    <string name="receipts_repeat">struk yang sama dua kali</string>
+    <plurals name="receipts_skipped">
+        <item quantity="other">%1$d foto tidak terlihat seperti struk dan dilewati.</item>
+    </plurals>
+
+    <!-- Aturan kata kunci -->
+    <string name="keywords_title">Aturan kata kunci</string>
+    <string name="keywords_intro">Ajari aplikasi kata-katamu sendiri. Kalau nama toko atau teks transaksi berisi kata itu, kategorinya ikut. Berlaku untuk notifikasi, e-statement, dan struk.</string>
+    <string name="keywords_word">Kata atau frasa</string>
+    <string name="keywords_word_example">mis. kopi, laundry, kos</string>
+    <string name="keywords_category">Kategori</string>
+    <string name="keywords_add">Tambah aturan</string>
+    <string name="keywords_saved">\"%1$s\" tersimpan.</string>
+    <plurals name="keywords_saved_filled">
+        <item quantity="other">\"%1$s\" tersimpan. %2$d transaksi di kotak cek mendapat kategori.</item>
+    </plurals>
+    <string name="keywords_yours">Aturanmu (%1$d)</string>
+    <string name="keywords_empty">Belum ada aturan. Tambahkan kata di atas.</string>
+    <string name="keywords_goes_to">Masuk ke %1$s</string>
+    <string name="keywords_order_hint">Hanya kata utuh: \"kopi\" cocok dengan \"Kopi Kenangan\" tapi tidak dengan \"kopiah\". Kalau dua kata cocok, yang lebih panjang menang. Kategori yang kamu atur untuk satu toko tertentu tetap didahulukan. Aturan ikut tersimpan di cadangan.</string>
+
+    <!-- Beranda dan Riwayat (desain baru) -->
+    <string name="greeting_morning">Selamat pagi</string>
+    <string name="greeting_afternoon">Selamat siang</string>
+    <string name="greeting_evening">Selamat malam</string>
+    <string name="pick_month">Pilih bulan</string>
+    <string name="search">Cari</string>
+    <string name="notifications_review">Kotak cek</string>
+    <plurals name="total_balance_accounts">
+        <item quantity="other">Total saldo · %1$d akun</item>
+    </plurals>
+    <string name="monthly_budget">Anggaran bulanan</string>
+    <string name="budget_used">%1$d%% terpakai</string>
+    <string name="budget_left">Sisa %1$s</string>
+    <string name="budget_over">Lewat %1$s</string>
+    <plurals name="days_to_go">
+        <item quantity="other">%1$d hari lagi</item>
+    </plurals>
+    <string name="quick_add">Catat manual</string>
+    <string name="quick_scan">Pindai struk</string>
+    <string name="quick_auto">Catat otomatis</string>
+    <string name="state_on">Aktif</string>
+    <string name="state_off">Mati</string>
+    <string name="quick_actions">Aksi cepat</string>
+    <string name="day_today">Hari ini</string>
+    <string name="day_yesterday">Kemarin</string>
+    <string name="filter_auto">Otomatis</string>
+    <string name="history_search_hint">Cari toko, catatan, nominal</string>
+    <string name="filters">Filter</string>
+    <string name="in_out">Masuk %1$s · Keluar %2$s</string>
+    <!-- Transaksi baru (desain baru) -->
+    <string name="optional">Opsional</string>
+    <string name="choose">Pilih</string>
+    <string name="save_expense">Simpan pengeluaran</string>
+    <string name="save_income">Simpan pemasukan</string>
+    <string name="save_transfer">Simpan transfer</string>
+    <string name="delete_digit">Hapus angka</string>
+    <!-- Tampilan -->
+    <string name="appearance">Tampilan</string>
+    <string name="live_preview">Pratinjau langsung</string>
+    <string name="total_balance">Total saldo</string>
+    <string name="preview_budget">Anggaran %1$d%%</string>
+    <string name="theme_system_short">Sistem</string>
+    <string name="amoled_title">Hitam pekat (AMOLED)</string>
+    <string name="amoled_hint">Latar hitam murni di mode gelap, hemat baterai di layar OLED</string>
+    <string name="dynamic_title">Warna dinamis</string>
+    <string name="dynamic_hint">Ikuti wallpaper · Android 12+</string>
+    <string name="dynamic_unsupported">Perlu Android 12 atau lebih baru</string>
+    <string name="accent_color">Warna aksen</string>
+    <string name="accent_hint">Dipakai untuk tombol, grafik, dan sorotan.</string>
+    <string name="accent_dynamic_hint">Warna dinamis aktif, jadi aksennya diambil dari wallpaper.</string>
+    <string name="accent_emerald">Zamrud</string>
+    <string name="accent_blue">Biru</string>
+    <string name="accent_violet">Ungu</string>
+    <string name="accent_orange">Jingga</string>
+    <string name="appearance_summary">%1$s · %2$s</string>
+    <string name="wallpaper">Wallpaper</string>
+    <!-- Ukuran tampilan -->
+    <string name="ui_size">Ukuran</string>
+    <string name="size_smaller">Terkecil</string>
+    <string name="size_small">Kecil</string>
+    <string name="size_default">Standar</string>
+    <string name="size_large">Besar</string>
+    <string name="size_hint">Teks, tombol, dan jarak ikut mengecil atau membesar bersama. Ukuran huruf di pengaturan HP tetap berlaku.</string></resources>

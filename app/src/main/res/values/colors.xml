@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ground">#F3F5F4</color>
-    <color name="brand">#0E5A47</color>
+    <!-- Window colours before Compose draws (the app's own theme takes over right after). -->
+    <color name="ground">#F4F5F7</color>
+    <color name="brand">#047857</color>
+    <!-- Bonchosu icon green. -->
+    <color name="icon_background">#077A55</color>
 </resources>
